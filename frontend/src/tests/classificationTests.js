@@ -162,6 +162,13 @@ export const TEST_SUITE = [
     name: '24. Ambiguous complaint → Manual Review',
     input: 'Something is wrong',
     expectedRoutingStatus: 'manual_review'
+  },
+  {
+    name: '25. Washroom cleaning complaint → Hostel Committee / Housekeeping',
+    input: 'washroom not cleaned',
+    expectedDept: 'Hostel Committee',
+    expectedCategory: 'housekeeping',
+    expectedSubcategory: 'washroom_cleaning'
   }
 ];
 

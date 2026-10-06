@@ -117,23 +117,10 @@ export default function ReportProblemView({ onSubmitReport, nearbyActivity = [] 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <div className="bg-white rounded-2xl shadow-sm border border-[#e5e2e1] p-4 sm:p-6 flex flex-col gap-4">
           
-          {/* Category Pill Selector */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-[#47464b] mr-1">Type:</span>
-            {['Issue', 'Complaint', 'Feedback'].map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setCategory(cat)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
-                  category === cat
-                    ? 'bg-[#1b1b1e] text-white shadow-2xs'
-                    : 'bg-[#f7f3f2] text-[#47464b] hover:bg-[#e5e2e1]'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+          {/* AI Automated Intent & Category Indicator */}
+          <div className="flex items-center gap-2 text-xs text-[#39618c] font-bold bg-blue-50 px-3.5 py-1.5 rounded-xl border border-blue-200/60 self-start shadow-2xs">
+            <span className="material-symbols-outlined text-sm text-[#39618c]">smart_toy</span>
+            <span>AI Automated Intent & Department Detection Active</span>
           </div>
 
           {/* Textarea Input */}

@@ -245,19 +245,28 @@ export function classifyComplaintLocal(text = '') {
   }
 
   // B. HOSTEL COMMITTEE (Physical Infrastructure)
-  else if (/latch|door|lock|pankha|fan|light|switch|socket|electricity|wire|wiring|tap|shower|toilet|leak|flush|drainage|pipe|washbasin|cleaning|garbage|dirty|room change|geyser|bed|chair|table|cupboard|furniture|room/i.test(lower)) {
+  else if (/clean|cleaning|cleaned|garbage|dirty|dustbin|safai|saaf|latch|door|lock|pankha|fan|light|switch|socket|electricity|wire|wiring|tap|shower|toilet|leak|flush|drainage|pipe|washbasin|room change|geyser|bed|chair|table|cupboard|furniture|room|washroom|bathroom/i.test(lower)) {
     department = 'Hostel Committee';
 
-    // B0. Room / Accommodation (Specific rule checked first)
-    if (/room change|room allocation|accommodation/i.test(lower)) {
+    // B0. Housekeeping (Checked FIRST if cleaning / hygiene keywords exist)
+    if (/clean|cleaning|cleaned|dirty|garbage|dustbin|trash|mop|sweeping|safai|saaf|kacha|unclean|not clean/i.test(lower)) {
+      category = 'housekeeping';
+      const isWashroom = /washroom|bathroom|toilet/.test(lower);
+      subcategory = isWashroom ? 'washroom_cleaning' : 'room_cleaning';
+      issue_summary = isWashroom ? 'Washroom is not cleaned / requires hygiene sanitization' : 'Room cleaning and trash disposal request';
+      requested_action = 'Dispatch housekeeping staff for immediate cleaning';
+      confidence = 0.96;
+    }
+    // B1. Room / Accommodation
+    else if (/room change|room allocation|accommodation/i.test(lower)) {
       category = 'accommodation';
       subcategory = 'room_change';
       issue_summary = 'Student hostel room change / transfer request';
       requested_action = 'Process room change application according to policy';
       confidence = 0.94;
     }
-    // B1. Plumbing (Checked before generic furniture/room rules)
-    else if (/tap|shower|toilet|leak|flush|drainage|pipe|washbasin|water|nal|bathroom/i.test(lower)) {
+    // B2. Plumbing (Checked after Housekeeping)
+    else if (/tap|shower|toilet|leak|flush|drainage|pipe|washbasin|water|nal|bathroom|washroom/i.test(lower)) {
       category = 'plumbing';
       if (/tap|nal/i.test(lower)) subcategory = 'tap_repair';
       else if (/leak/i.test(lower)) subcategory = 'water_leakage';
@@ -267,7 +276,7 @@ export function classifyComplaintLocal(text = '') {
       requested_action = 'Inspect plumbing line and stop leakage';
       confidence = 0.96;
     }
-    // B2. Carpenter
+    // B3. Carpenter
     else if (/latch|door|lock|wooden|bed|table|chair|cupboard|furniture|woodwork/i.test(lower)) {
       category = 'carpenter';
       if (/latch/i.test(lower)) subcategory = 'door_latch';
@@ -278,7 +287,7 @@ export function classifyComplaintLocal(text = '') {
       requested_action = 'Repair or replace damaged door/furniture fixture';
       confidence = 0.95;
     }
-    // B2. Electrical
+    // B4. Electrical
     else if (/fan|pankha|light|switch|socket|electricity|wire|wiring|spark|power/i.test(lower)) {
       category = 'electrical';
       if (/fan|pankha/i.test(lower)) subcategory = 'fan';
@@ -289,34 +298,7 @@ export function classifyComplaintLocal(text = '') {
       requested_action = 'Inspect electrical fixture and restore power supply';
       confidence = 0.95;
     }
-    // B3. Plumbing
-    else if (/tap|shower|toilet|leak|flush|drainage|pipe|washbasin|water|nal/i.test(lower)) {
-      category = 'plumbing';
-      if (/tap|nal/i.test(lower)) subcategory = 'tap_repair';
-      else if (/leak/i.test(lower)) subcategory = 'water_leakage';
-      else if (/toilet|flush/i.test(lower)) subcategory = 'toilet_flush';
-      else subcategory = 'pipe_drainage';
-      issue_summary = 'Water leakage or plumbing fixture breakdown';
-      requested_action = 'Inspect plumbing line and stop leakage';
-      confidence = 0.96;
-    }
-    // B4. Housekeeping
-    else if (/clean|cleaning|garbage|dirty|dustbin|washroom clean/i.test(lower)) {
-      category = 'housekeeping';
-      subcategory = 'cleaning_request';
-      issue_summary = 'Room or washroom cleaning request';
-      requested_action = 'Dispatch housekeeping personnel to clean area';
-      confidence = 0.93;
-    }
-    // B5. Room / Accommodation
-    else if (/room change|room allocation|accommodation/i.test(lower)) {
-      category = 'accommodation';
-      subcategory = 'room_change';
-      issue_summary = 'Student hostel room change / transfer request';
-      requested_action = 'Process room change application according to policy';
-      confidence = 0.94;
-    }
-    // B6. Maintenance
+    // B5. Maintenance Fallback
     else {
       category = 'maintenance';
       subcategory = 'general_maintenance';
