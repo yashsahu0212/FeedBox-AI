@@ -1,0 +1,72 @@
+[
+  { "text": "My wifi is not working", "department": "CTS", "category": "technical", "subcategory": "wifi", "intent": "complaint", "priority": "high" },
+  { "text": "wifi nhi chal raha hai room me", "department": "CTS", "category": "technical", "subcategory": "wifi", "intent": "complaint", "priority": "high" },
+  { "text": "wifi nhi chal raha", "department": "CTS", "category": "technical", "subcategory": "wifi", "intent": "complaint", "priority": "high" },
+  { "text": "net bahut slow hai second floor pe", "department": "CTS", "category": "technical", "subcategory": "internet_speed", "intent": "complaint", "priority": "medium" },
+  { "text": "Internet is very slow in my room", "department": "CTS", "category": "technical", "subcategory": "internet_speed", "intent": "complaint", "priority": "medium" },
+  { "text": "Internet speed is terrible in study hall", "department": "CTS", "category": "technical", "subcategory": "internet_speed", "intent": "complaint", "priority": "medium" },
+  { "text": "I cannot login to VTOP portal", "department": "CTS", "category": "technical", "subcategory": "portal_login", "intent": "complaint", "priority": "high" },
+  { "text": "Cannot login to VTOP portal getting 500 error", "department": "CTS", "category": "technical", "subcategory": "portal_login", "intent": "complaint", "priority": "high" },
+  { "text": "portal open nhi ho raha login credentials invalid bol raha hai", "department": "CTS", "category": "technical", "subcategory": "portal_login", "intent": "complaint", "priority": "high" },
+  { "text": "LAN cable slot in my desk is broken", "department": "CTS", "category": "technical", "subcategory": "network", "intent": "complaint", "priority": "medium" },
+  
+  { "text": "washroom not cleaned", "department": "Hostel Committee", "category": "housekeeping", "subcategory": "washroom_cleaning", "intent": "complaint", "priority": "high" },
+  { "text": "washroom dirty hai saaf karwado", "department": "Hostel Committee", "category": "housekeeping", "subcategory": "washroom_cleaning", "intent": "complaint", "priority": "high" },
+  { "text": "toilet is unclean and smells horrible", "department": "Hostel Committee", "category": "housekeeping", "subcategory": "washroom_cleaning", "intent": "complaint", "priority": "high" },
+  { "text": "my room needs cleaning and garbage removal", "department": "Hostel Committee", "category": "housekeeping", "subcategory": "room_cleaning", "intent": "complaint", "priority": "medium" },
+  { "text": "room me kacha pada hai dustbin overflow ho raha hai", "department": "Hostel Committee", "category": "housekeeping", "subcategory": "room_cleaning", "intent": "complaint", "priority": "medium" },
+  { "text": "garbage has not been collected from floor 3", "department": "Hostel Committee", "category": "housekeeping", "subcategory": "room_cleaning", "intent": "complaint", "priority": "medium" },
+  { "text": "sweeping and mopping needed in room 402", "department": "Hostel Committee", "category": "housekeeping", "subcategory": "room_cleaning", "intent": "complaint", "priority": "medium" },
+
+  { "text": "My door latch is broken and want to replace it as soon as possible in block 3 7th floor B 701", "department": "Hostel Committee", "category": "carpenter", "subcategory": "door_latch", "intent": "complaint", "priority": "urgent" },
+  { "text": "door ka latch toot gaya hai jaldi fix karo", "department": "Hostel Committee", "category": "carpenter", "subcategory": "door_latch", "intent": "complaint", "priority": "urgent" },
+  { "text": "door ka latch toot gaya hai room lock nhi ho raha", "department": "Hostel Committee", "category": "carpenter", "subcategory": "door_latch", "intent": "complaint", "priority": "urgent" },
+  { "text": "My study chair is broken in room 302", "department": "Hostel Committee", "category": "carpenter", "subcategory": "chair_repair", "intent": "complaint", "priority": "low" },
+  { "text": "chair leg is cracked and wobbly", "department": "Hostel Committee", "category": "carpenter", "subcategory": "chair_repair", "intent": "complaint", "priority": "low" },
+  { "text": "bed frame drawer is stuck and broken", "department": "Hostel Committee", "category": "carpenter", "subcategory": "furniture", "intent": "complaint", "priority": "medium" },
+  { "text": "cupboard door hinges are coming off", "department": "Hostel Committee", "category": "carpenter", "subcategory": "furniture", "intent": "complaint", "priority": "medium" },
+
+  { "text": "The fan in my room is not working", "department": "Hostel Committee", "category": "electrical", "subcategory": "fan", "intent": "complaint", "priority": "high" },
+  { "text": "My fan is not working", "department": "Hostel Committee", "category": "electrical", "subcategory": "fan", "intent": "complaint", "priority": "high" },
+  { "text": "mere room ka pankha kharab hai", "department": "Hostel Committee", "category": "electrical", "subcategory": "fan", "intent": "complaint", "priority": "high" },
+  { "text": "pankha kharab ho gaya hai garmi hai bahut", "department": "Hostel Committee", "category": "electrical", "subcategory": "fan", "intent": "complaint", "priority": "high" },
+  { "text": "light bulb is flickering constantly", "department": "Hostel Committee", "category": "electrical", "subcategory": "light_fixture", "intent": "complaint", "priority": "medium" },
+  { "text": "My room light is flickering", "department": "Hostel Committee", "category": "electrical", "subcategory": "light_fixture", "intent": "complaint", "priority": "medium" },
+  { "text": "There is exposed electrical wiring in my room ASAP emergency", "department": "Hostel Committee", "category": "electrical", "subcategory": "wiring_hazard", "intent": "complaint", "priority": "urgent" },
+  { "text": "exposed electrical wiring sparking in wall socket urgent", "department": "Hostel Committee", "category": "electrical", "subcategory": "wiring_hazard", "intent": "complaint", "priority": "urgent" },
+  { "text": "switchboard is loose and sparking", "department": "Hostel Committee", "category": "electrical", "subcategory": "power_socket", "intent": "complaint", "priority": "urgent" },
+  
+  { "text": "there is water leaking from my bathroom in block 3 room B701", "department": "Hostel Committee", "category": "plumbing", "subcategory": "water_leakage", "intent": "complaint", "priority": "high" },
+  { "text": "bathroom ka nal leak kar raha hai", "department": "Hostel Committee", "category": "plumbing", "subcategory": "water_leakage", "intent": "complaint", "priority": "high" },
+  { "text": "bathroom ka nal leak kar raha hai paani beh raha hai", "department": "Hostel Committee", "category": "plumbing", "subcategory": "water_leakage", "intent": "complaint", "priority": "high" },
+  { "text": "the washroom tap is broken", "department": "Hostel Committee", "category": "plumbing", "subcategory": "tap_repair", "intent": "complaint", "priority": "high" },
+  { "text": "the washroom tap is broken and won't close", "department": "Hostel Committee", "category": "plumbing", "subcategory": "tap_repair", "intent": "complaint", "priority": "high" },
+  { "text": "shower head has low water pressure", "department": "Hostel Committee", "category": "plumbing", "subcategory": "pipe_drainage", "intent": "complaint", "priority": "medium" },
+  { "text": "flush tank in 2nd floor toilet is overflowing", "department": "Hostel Committee", "category": "plumbing", "subcategory": "toilet_flush", "intent": "complaint", "priority": "urgent" },
+
+  { "text": "I need room change to block 4", "department": "Hostel Committee", "category": "accommodation", "subcategory": "room_change", "intent": "request", "priority": "low" },
+  { "text": "I want to change my room to block 4", "department": "Hostel Committee", "category": "accommodation", "subcategory": "room_change", "intent": "request", "priority": "low" },
+  { "text": "need room change request due to roommate conflict", "department": "Hostel Committee", "category": "accommodation", "subcategory": "room_change", "intent": "request", "priority": "low" },
+
+  { "text": "hostel food quality is very bad", "department": "Mess", "category": "mess", "subcategory": "food_quality", "intent": "feedback", "priority": "low" },
+  { "text": "hostel food quality is very bad and oily", "department": "Mess", "category": "mess", "subcategory": "food_quality", "intent": "feedback", "priority": "low" },
+  { "text": "mess food taste is terrible and cold dinner served", "department": "Mess", "category": "mess", "subcategory": "food_quality", "intent": "complaint", "priority": "medium" },
+  { "text": "found insects in mess food vegetables hygiene issues", "department": "Mess", "category": "mess", "subcategory": "mess_hygiene", "intent": "complaint", "priority": "urgent" },
+
+  { "text": "I lost my ID card", "department": "Security", "category": "security", "subcategory": "theft_or_loss", "intent": "report", "priority": "medium" },
+  { "text": "I lost my ID card near main library gate", "department": "Security", "category": "security", "subcategory": "theft_or_loss", "intent": "report", "priority": "medium" },
+  { "text": "someone entered the hostel without security badge at night", "department": "Security", "category": "security", "subcategory": "unauthorized_access", "intent": "report", "priority": "urgent" },
+  { "text": "laptop stolen from room 204 block 2", "department": "Security", "category": "security", "subcategory": "theft_or_loss", "intent": "report", "priority": "urgent" },
+
+  { "text": "there is a problem with my attendance", "department": "Academic", "category": "academic", "subcategory": "attendance_dispute", "intent": "complaint", "priority": "medium" },
+  { "text": "there is a problem with my attendance in chemistry lab", "department": "Academic", "category": "academic", "subcategory": "attendance_dispute", "intent": "complaint", "priority": "medium" },
+  { "text": "professor did not mark present for online submission", "department": "Academic", "category": "academic", "subcategory": "attendance_dispute", "intent": "complaint", "priority": "medium" },
+  { "text": "exam schedule collision on same day hall ticket issue", "department": "Academic", "category": "academic", "subcategory": "examination", "intent": "complaint", "priority": "high" },
+
+  { "text": "my fee payment is showing pending", "department": "Accounts", "category": "finance", "subcategory": "payment_status", "intent": "complaint", "priority": "high" },
+  { "text": "my fee payment is showing pending after online transaction", "department": "Accounts", "category": "finance", "subcategory": "payment_status", "intent": "complaint", "priority": "high" },
+  { "text": "fee refund receipt not generated double debit", "department": "Accounts", "category": "finance", "subcategory": "refund_request", "intent": "complaint", "priority": "high" },
+
+  { "text": "campus bus timing is unpunctual driver skipped route", "department": "Transport", "category": "transport", "subcategory": "bus_service", "intent": "complaint", "priority": "medium" },
+  { "text": "shuttle bus to main gate was full and left early", "department": "Transport", "category": "transport", "subcategory": "bus_service", "intent": "complaint", "priority": "medium" }
+]
