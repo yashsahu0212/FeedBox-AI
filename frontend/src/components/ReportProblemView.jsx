@@ -1,27 +1,16 @@
 import React, { useState } from 'react';
+import { classifyComplaintAI } from '../lib/aiClassifier';
 
 export default function ReportProblemView({ onSubmitReport, nearbyActivity = [] }) {
   const [description, setDescription] = useState('');
-  const [location, setLocation] = useState('');
+  const [locationText, setLocationText] = useState('');
   const [category, setCategory] = useState('Issue');
   const [attachedImage, setAttachedImage] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // AI Submission & Result State
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [aiResult, setAiResult] = useState(null);
   const [submittedTicket, setSubmittedTicket] = useState(null);
-
-  // Auto detect department based on description keywords
-  const detectDepartment = (text) => {
-    const lower = text.toLowerCase();
-    if (lower.includes('wifi') || lower.includes('internet') || lower.includes('computer') || lower.includes('login') || lower.includes('software')) {
-      return 'IT Services';
-    }
-    if (lower.includes('projector') || lower.includes('mic') || lower.includes('audio') || lower.includes('speaker') || lower.includes('screen')) {
-      return 'AV & Classroom Tech';
-    }
-    if (lower.includes('clean') || lower.includes('chair') || lower.includes('desk') || lower.includes('space') || lower.includes('seating')) {
-      return 'Campus Operations';
-    }
-    return 'Facilities & Maintenance';
-  };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -38,45 +27,69 @@ export default function ReportProblemView({ onSubmitReport, nearbyActivity = [] 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setLocation(`Science Complex, Room 204 (Lat: ${position.coords.latitude.toFixed(2)})`);
+          setLocationText(`Science Complex, Room 204 (Lat: ${position.coords.latitude.toFixed(2)})`);
         },
         () => {
-          setLocation('Science Complex, Room 204');
+          setLocationText('Science Complex, Room 204');
         }
       );
     } else {
-      setLocation('Science Complex, Room 204');
+      setLocationText('Science Complex, Room 204');
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!description.trim()) return;
 
-    setIsSubmitting(true);
+    setIsAnalyzing(true);
+    setAiResult(null);
 
-    const autoDept = detectDepartment(description);
-    const newTicket = {
-      title: description.slice(0, 55).trim() + (description.length > 55 ? '...' : ''),
-      description: description.trim(),
-      location: location.trim() || 'Science Complex, Room 204',
-      category: category,
-      department: autoDept,
-      attachedPhoto: attachedImage
-    };
+    // Combine user text & optional location string for complete AI classification
+    const fullText = locationText.trim() ? `${description.trim()} in ${locationText.trim()}` : description.trim();
 
-    setTimeout(() => {
+    try {
+      // 1. Run AI Classification Engine (with n8n Webhook support & fallback)
+      const classification = await classifyComplaintAI(fullText);
+      setAiResult(classification);
+
+      // Prepare submission object
+      const primaryIssue = classification.multiple_issues ? classification.issues[0] : classification;
+      
+      const newTicket = {
+        title: primaryIssue.issue_summary || description.slice(0, 55).trim(),
+        description: description.trim(),
+        location: classification.location
+          ? [
+              classification.location.hostel_block,
+              classification.location.floor ? `${classification.location.floor} Floor` : null,
+              classification.location.wing ? `Wing ${classification.location.wing}` : null,
+              classification.location.room ? `Room ${classification.location.room}` : null,
+              classification.location.additional_location
+            ].filter(Boolean).join(' • ')
+          : (locationText.trim() || 'Unspecified'),
+        category: primaryIssue.category || category,
+        department: primaryIssue.department || 'Hostel Committee',
+        priority: primaryIssue.priority || 'medium',
+        attachedPhoto: attachedImage,
+        aiClassification: classification
+      };
+
       const created = onSubmitReport(newTicket);
       setSubmittedTicket(created);
-      setIsSubmitting(false);
-    }, 600);
+    } catch (err) {
+      console.error('AI Classification failed:', err);
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const resetForm = () => {
     setDescription('');
-    setLocation('');
+    setLocationText('');
     setCategory('Issue');
     setAttachedImage(null);
+    setAiResult(null);
     setSubmittedTicket(null);
   };
 
@@ -85,15 +98,18 @@ export default function ReportProblemView({ onSubmitReport, nearbyActivity = [] 
       {/* Header Section */}
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[#47464b]">
-          <span>Campus Operations</span>
+          <span className="flex items-center gap-1 text-[#39618c] font-bold">
+            <span className="material-symbols-outlined text-sm">smart_toy</span>
+            AI Automated Dispatch
+          </span>
           <span className="text-[#c8c5cb]">/</span>
-          <span className="text-[#1c1b1c] font-semibold">New Dispatch</span>
+          <span className="text-[#1c1b1c] font-semibold">New Report</span>
         </div>
         <h1 className="font-display-lg text-2xl sm:text-3xl md:text-4xl text-[#1c1b1c] tracking-tight font-semibold">
           What’s happening?
         </h1>
         <p className="font-body-lg text-sm sm:text-base text-[#47464b] leading-relaxed">
-          Describe the problem or share your feedback. We'll automatically route it to the appropriate team.
+          Describe your problem or feedback in natural language or Hinglish. Our AI automatically classifies, extracts location, and routes it to the right department.
         </p>
       </div>
 
@@ -109,7 +125,7 @@ export default function ReportProblemView({ onSubmitReport, nearbyActivity = [] 
                 key={cat}
                 type="button"
                 onClick={() => setCategory(cat)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
                   category === cat
                     ? 'bg-[#1b1b1e] text-white shadow-2xs'
                     : 'bg-[#f7f3f2] text-[#47464b] hover:bg-[#e5e2e1]'
@@ -131,7 +147,7 @@ export default function ReportProblemView({ onSubmitReport, nearbyActivity = [] 
               rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Tell us what happened... (e.g., 'The AC in classroom 204 has not been working for two days' or 'The water fountain on 3rd floor is leaking')"
+              placeholder="e.g. 'My door latch is broken and want to replace it as soon as possible in block 3 7th floor B 701' or 'wifi nhi chal raha'"
               className="w-full bg-transparent font-body-lg text-sm sm:text-base text-[#1c1b1c] placeholder:text-[#77767b] focus:outline-none resize-none leading-relaxed"
             />
           </div>
@@ -165,16 +181,16 @@ export default function ReportProblemView({ onSubmitReport, nearbyActivity = [] 
               <button
                 type="button"
                 onClick={handleGeolocate}
-                className="text-[#77767b] hover:text-[#1c1b1c] focus:outline-none"
+                className="text-[#77767b] hover:text-[#1c1b1c] focus:outline-none cursor-pointer"
                 title="Detect current location"
               >
                 <span className="material-symbols-outlined text-lg select-none">location_on</span>
               </button>
               <input
                 type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="Location (e.g. Science Complex, Room 204)"
+                value={locationText}
+                onChange={(e) => setLocationText(e.target.value)}
+                placeholder="Optional location (e.g. Block 3, 7th floor B 701)"
                 className="w-full bg-transparent font-body-sm text-xs sm:text-sm text-[#1c1b1c] placeholder:text-[#77767b] focus:outline-none"
               />
             </div>
@@ -195,13 +211,13 @@ export default function ReportProblemView({ onSubmitReport, nearbyActivity = [] 
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isSubmitting || !description.trim()}
+                disabled={isAnalyzing || !description.trim()}
                 className="h-10 px-5 rounded-xl bg-[#1b1b1e] text-white hover:bg-[#313030] active:scale-[0.98] disabled:opacity-50 transition-all flex items-center justify-center gap-2 font-label-md text-xs sm:text-sm shadow-xs cursor-pointer"
               >
-                {isSubmitting ? (
+                {isAnalyzing ? (
                   <>
-                    <span className="material-symbols-outlined text-base animate-spin">sync</span>
-                    <span>Dispatching...</span>
+                    <span className="material-symbols-outlined text-base animate-spin">smart_toy</span>
+                    <span>Analyzing your complaint...</span>
                   </>
                 ) : (
                   <>
@@ -217,74 +233,164 @@ export default function ReportProblemView({ onSubmitReport, nearbyActivity = [] 
 
         {/* Quick Guide Callout */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 px-2 text-[#47464b] font-code-sm text-xs">
-          <span className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-base text-emerald-600 select-none">verified</span>
-            Automatic department routing to <strong className="text-[#1c1b1c]">{detectDepartment(description)}</strong>
+          <span className="flex items-center gap-1.5 text-[#39618c] font-semibold">
+            <span className="material-symbols-outlined text-base text-emerald-600 select-none">auto_awesome</span>
+            AI Engine auto-extracts department, location & urgency
           </span>
-          <span className="text-[#77767b]">Press <kbd className="px-1.5 py-0.5 rounded bg-white border border-[#c8c5cb] text-[#1c1b1c]">Ctrl / ⌘</kbd> + <kbd class="px-1.5 py-0.5 rounded bg-white border border-[#c8c5cb] text-[#1c1b1c]">Enter</kbd> to send</span>
+          <span className="text-[#77767b]">Supports Hinglish ("wifi nhi chal raha")</span>
         </div>
       </form>
 
-      {/* Confirmation Banner if Ticket Submitted */}
-      {submittedTicket && (
+      {/* AI Analyzing Loading Banner */}
+      {isAnalyzing && (
+        <div className="p-6 bg-white rounded-2xl shadow-md border border-[#e5e2e1] flex flex-col items-center justify-center text-center gap-3 animate-in fade-in duration-200">
+          <div className="w-12 h-12 rounded-full bg-blue-50 text-[#39618c] flex items-center justify-center animate-bounce">
+            <span className="material-symbols-outlined text-2xl select-none">smart_toy</span>
+          </div>
+          <div>
+            <h3 className="font-headline-md text-base text-[#1c1b1c] font-bold">Analyzing your complaint...</h3>
+            <p className="font-body-sm text-xs text-[#77767b] mt-1">
+              Parsing natural language, extracting location & matching department rules via n8n AI engine...
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* SECTION 16: CONFIRMATION & CLASSIFICATION SUMMARY CARD */}
+      {submittedTicket && aiResult && (
         <div className="flex flex-col gap-3 transition-all duration-300 animate-in fade-in zoom-in-95">
           <div className="flex items-center justify-between">
-            <span className="font-code-sm text-xs font-bold uppercase tracking-wider text-[#47464b]">
-              Live Dispatch Status
+            <span className="font-code-sm text-xs font-bold uppercase tracking-wider text-[#39618c] flex items-center gap-1">
+              <span className="material-symbols-outlined text-sm text-emerald-500">verified</span>
+              AI Classification & Routing Confirmation
             </span>
             <button
               type="button"
               onClick={resetForm}
               className="font-code-sm text-xs text-[#39618c] font-semibold hover:underline cursor-pointer"
             >
-              Reset / Send Another
+              Submit Another Report
             </button>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-md border border-[#e5e2e1] p-5 sm:p-6 flex flex-col gap-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="bg-white rounded-2xl shadow-md border border-[#e5e2e1] p-5 sm:p-6 flex flex-col gap-5">
+            
+            {/* Header: Status & ID */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#e5e2e1] pb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 shadow-2xs">
                   <span className="material-symbols-outlined text-xl select-none">check_circle</span>
                 </div>
                 <div>
                   <h2 className="font-headline-md text-base sm:text-lg text-[#1c1b1c] font-bold">
-                    Report submitted successfully
+                    Report Dispatched & Categorized
                   </h2>
                   <p className="font-body-sm text-xs text-[#47464b]">
-                    Ticket #{submittedTicket.id} • Created just now
+                    Ticket ID: <span className="font-mono font-bold text-[#1c1b1c]">{submittedTicket.id}</span> • Confidence: {(aiResult.confidence * 100).toFixed(0)}%
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 self-start sm:self-auto">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#d1e4ff] text-[#001d36] font-label-sm text-xs font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#39618c]"></span>
-                  {submittedTicket.category}
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f1eded] text-[#1c1b1c] font-label-sm text-xs font-medium">
-                  {submittedTicket.status}
+              {/* Status Badge */}
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold uppercase tracking-wider">
+                  Submitted
                 </span>
               </div>
             </div>
 
-            {/* Description Recap */}
-            <div className="bg-[#f7f3f2] p-4 rounded-xl flex flex-col gap-2 border border-[#e5e2e1]">
-              <p className="font-body-md text-xs sm:text-sm text-[#1c1b1c] leading-normal italic">
-                “{submittedTicket.description}”
-              </p>
-              <div className="flex flex-wrap items-center gap-2 text-[#47464b] font-label-sm text-xs pt-1 border-t border-[#e5e2e1]">
-                <span className="material-symbols-outlined text-sm select-none">domain</span>
-                <span>Routed to <strong className="text-[#1c1b1c] font-semibold">{submittedTicket.department}</strong></span>
-                <span>•</span>
-                <span className="material-symbols-outlined text-sm select-none">place</span>
-                <span>{submittedTicket.location}</span>
+            {/* Multi-Issue Warning Banner */}
+            {aiResult.multiple_issues && (
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 flex items-center gap-2">
+                <span className="material-symbols-outlined text-base text-amber-600">call_split</span>
+                <span>
+                  <strong>Multi-Issue Complaint Detected:</strong> Automatically split into {aiResult.issues.length} separate department tickets for parallel handling!
+                </span>
+              </div>
+            )}
+
+            {/* Structured Classification Grid (Section 16 Format) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-[#f7f3f2] p-4 rounded-xl border border-[#e5e2e1]">
+              
+              {/* Department */}
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] uppercase font-mono tracking-wider text-[#77767b] font-bold">
+                  Department:
+                </span>
+                <span className="text-xs font-bold text-[#1c1b1c] bg-white px-2.5 py-1 rounded-lg border border-[#e5e2e1] self-start shadow-2xs flex items-center gap-1">
+                  <span className="material-symbols-outlined text-sm text-[#39618c]">domain</span>
+                  {aiResult.multiple_issues ? aiResult.issues[0].department : aiResult.department}
+                </span>
+              </div>
+
+              {/* Category */}
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] uppercase font-mono tracking-wider text-[#77767b] font-bold">
+                  Category:
+                </span>
+                <span className="text-xs font-semibold text-[#1c1b1c] capitalize">
+                  {aiResult.multiple_issues ? aiResult.issues[0].category : aiResult.category}
+                  {(aiResult.subcategory || (aiResult.issues && aiResult.issues[0].subcategory)) && (
+                    <span className="text-[#77767b]"> → {aiResult.subcategory || aiResult.issues[0].subcategory}</span>
+                  )}
+                </span>
+              </div>
+
+              {/* Priority */}
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] uppercase font-mono tracking-wider text-[#77767b] font-bold">
+                  Priority:
+                </span>
+                <div>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider inline-block ${
+                    (aiResult.priority || (aiResult.issues && aiResult.issues[0].priority)) === 'urgent'
+                      ? 'bg-red-100 text-red-700 border border-red-200'
+                      : (aiResult.priority || (aiResult.issues && aiResult.issues[0].priority)) === 'high'
+                      ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                      : 'bg-blue-100 text-blue-800 border border-blue-200'
+                  }`}>
+                    {aiResult.priority || (aiResult.issues && aiResult.issues[0].priority)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Location */}
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] uppercase font-mono tracking-wider text-[#77767b] font-bold">
+                  Location:
+                </span>
+                <span className="text-xs font-medium text-[#1c1b1c]">
+                  {aiResult.location ? (
+                    [
+                      aiResult.location.hostel_block,
+                      aiResult.location.floor ? `Floor ${aiResult.location.floor}` : null,
+                      aiResult.location.wing ? `Wing ${aiResult.location.wing}` : null,
+                      aiResult.location.room ? `Room ${aiResult.location.room}` : null
+                    ].filter(Boolean).join(' → ')
+                  ) : (
+                    <span className="text-[#77767b] italic">Not mentioned</span>
+                  )}
+                </span>
+              </div>
+
+            </div>
+
+            {/* Issue Summary & Human-Readable Explanation */}
+            <div className="flex flex-col gap-2">
+              <div>
+                <span className="text-[11px] font-bold text-[#47464b] block mb-0.5">AI Issue Summary:</span>
+                <p className="text-xs text-[#1c1b1c] font-medium bg-[#f7f3f2] p-3 rounded-xl border border-[#e5e2e1]">
+                  {aiResult.multiple_issues ? aiResult.issues[0].issue_summary : aiResult.issue_summary}
+                </p>
+              </div>
+
+              {/* Explanation Note (Privacy-Compliant without CoT) */}
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-[#001d36] flex items-center gap-2">
+                <span className="material-symbols-outlined text-base text-[#39618c] shrink-0">info</span>
+                <span>{aiResult.reason}</span>
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-1 text-xs">
-              <span className="text-[#47464b]">Estimated triage response: Within 2 hours</span>
-            </div>
           </div>
         </div>
       )}
@@ -323,3 +429,4 @@ export default function ReportProblemView({ onSubmitReport, nearbyActivity = [] 
     </div>
   );
 }
+

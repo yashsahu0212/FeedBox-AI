@@ -1,10 +1,12 @@
 {
   "name": "project-exhibition",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "npm run dev --prefix frontend",
     "build": "npm run build --prefix frontend",
-    "preview": "npm run preview --prefix frontend"
+    "preview": "npm run preview --prefix frontend",
+    "test:ai": "node run-tests.js"
   }
 }

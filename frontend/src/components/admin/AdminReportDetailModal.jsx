@@ -95,13 +95,19 @@ export default function AdminReportDetailModal({
           {/* LEFT 7 COLS: Report Specs & Status Actions */}
           <div className="lg:col-span-7 flex flex-col gap-5">
             
-            {/* Badges & Metadata */}
+            {/* Badges & Editable Admin Overrides */}
             <div className="flex flex-wrap items-center gap-2">
-              <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-900 border border-amber-200 uppercase tracking-wider">
-                {report.category}
+              <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                report.priority === 'urgent'
+                  ? 'bg-red-100 text-red-700 border border-red-200'
+                  : report.priority === 'high'
+                  ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                  : 'bg-blue-100 text-blue-800 border border-blue-200'
+              }`}>
+                {report.priority || report.urgency || 'MEDIUM'} Priority
               </span>
-              <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-900 border border-red-200 uppercase tracking-wider">
-                {report.urgency} Urgency
+              <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200 uppercase tracking-wider">
+                {report.category || 'General'}
               </span>
               <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#d1e4ff] text-[#001d36] uppercase tracking-wider">
                 Status: {report.status}
@@ -110,39 +116,92 @@ export default function AdminReportDetailModal({
 
             {/* Description */}
             <div className="bg-[#f7f3f2] p-4 rounded-xl border border-[#e5e2e1]">
-              <h3 className="text-xs font-bold text-[#47464b] uppercase mb-1.5">Original Description</h3>
-              <p className="text-xs sm:text-sm text-[#1c1b1c] leading-relaxed whitespace-pre-line">
-                {report.description}
+              <h3 className="text-xs font-bold text-[#47464b] uppercase mb-1.5 flex items-center justify-between">
+                <span>Original Student Complaint</span>
+                <span className="font-mono text-[10px] text-[#77767b]">Exact verbatim</span>
+              </h3>
+              <p className="text-xs sm:text-sm text-[#1c1b1c] leading-relaxed whitespace-pre-line font-medium">
+                “{report.description || report.original_text || report.title}”
               </p>
             </div>
 
             {/* Location & Times */}
             <div className="grid grid-cols-2 gap-3 text-xs bg-white p-3 rounded-xl border border-[#e5e2e1]">
               <div>
-                <span className="text-[#77767b] block">Location</span>
+                <span className="text-[#77767b] block font-bold">Extracted Location</span>
                 <span className="font-semibold text-[#1c1b1c]">{report.location || 'Campus Main'}</span>
               </div>
               <div>
-                <span className="text-[#77767b] block">Submitted On</span>
+                <span className="text-[#77767b] block font-bold">Submission Timestamp</span>
                 <span className="font-semibold text-[#1c1b1c]">
-                  {new Date(report.created_at).toLocaleString()}
+                  {new Date(report.created_at || Date.now()).toLocaleString()}
                 </span>
               </div>
             </div>
 
-            {/* AI Classification Metadata Card */}
-            {report.ai_classification && (
-              <div className="bg-emerald-50/60 p-3.5 rounded-xl border border-emerald-200 text-xs flex flex-col gap-1">
-                <div className="flex items-center gap-1.5 font-bold text-emerald-900">
-                  <span className="material-symbols-outlined text-base">psychology</span>
-                  <span>AI Classification Contract</span>
+            {/* AI Classification & Admin Override Contract */}
+            <div className="bg-emerald-50/70 p-4 rounded-xl border border-emerald-200 text-xs flex flex-col gap-2">
+              <div className="flex items-center justify-between font-bold text-emerald-950">
+                <span className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base text-emerald-700">psychology</span>
+                  AI Classification & Admin Override Contract
+                </span>
+                <span className="font-mono text-[10px] bg-emerald-100 px-2 py-0.5 rounded text-emerald-800">
+                  Confidence: {((report.ai_classification?.confidence || 0.95) * 100).toFixed(0)}%
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-1 text-slate-800">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-emerald-900 uppercase">Assigned Dept:</label>
+                  <select
+                    value={report.department_name || report.department || 'Hostel Committee'}
+                    onChange={(e) => onUpdateStatus(report.id, report.status, `Reassigned department to ${e.target.value}`)}
+                    className="bg-white border border-emerald-300 rounded-lg p-1.5 font-bold text-xs cursor-pointer"
+                  >
+                    <option value="CTS">CTS (Technical)</option>
+                    <option value="Hostel Committee">Hostel Committee</option>
+                    <option value="Security">Security</option>
+                    <option value="Academic">Academic</option>
+                    <option value="Accounts">Accounts / Finance</option>
+                    <option value="Mess">Mess Services</option>
+                    <option value="Transport">Transport</option>
+                    <option value="Administration">Administration</option>
+                    <option value="manual_review">Manual Review</option>
+                  </select>
                 </div>
-                <div className="text-emerald-800 grid grid-cols-2 gap-2 mt-1">
-                  <span>Suggested Dept: <strong>{report.ai_classification.suggested_department || 'CTS'}</strong></span>
-                  <span>Confidence: <strong>{((report.ai_classification.confidence || 0.95) * 100).toFixed(0)}%</strong></span>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-emerald-900 uppercase">Category:</label>
+                  <input
+                    type="text"
+                    defaultValue={report.category || 'carpenter'}
+                    onBlur={(e) => onUpdateStatus(report.id, report.status, `Updated category to ${e.target.value}`)}
+                    className="bg-white border border-emerald-300 rounded-lg p-1.5 font-semibold text-xs"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-emerald-900 uppercase">Priority:</label>
+                  <select
+                    value={report.priority || report.urgency || 'medium'}
+                    onChange={(e) => onUpdateStatus(report.id, report.status, `Changed priority to ${e.target.value}`)}
+                    className="bg-white border border-emerald-300 rounded-lg p-1.5 font-bold text-xs cursor-pointer capitalize"
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
+                  </select>
                 </div>
               </div>
-            )}
+
+              {report.ai_classification?.reason && (
+                <p className="text-[11px] text-emerald-900 italic mt-1 bg-white/80 p-2 rounded border border-emerald-200">
+                  AI Note: {report.ai_classification.reason}
+                </p>
+              )}
+            </div>
 
             {/* Attachment Preview if available */}
             {report.attachment_url && (
