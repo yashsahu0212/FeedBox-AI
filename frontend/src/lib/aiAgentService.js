@@ -340,9 +340,13 @@ export async function analyzeReportWithAIAgent(reportText = '', options = {}) {
         endpoint = endpoint || 'https://api.groq.com/openai/v1/chat/completions';
         headers['Authorization'] = `Bearer ${llmApiKey}`;
         body = {
-          model: llmModel || 'llama-3.3-70b-versatile',
+          model: llmModel || 'openai/gpt-oss-20b',
           messages: [
             { role: 'system', content: SYSTEM_PROMPT },
+            ...FEW_SHOT_EXAMPLES.flatMap(ex => [
+              { role: 'user', content: ex.input },
+              { role: 'assistant', content: JSON.stringify(ex.output) }
+            ]),
             { role: 'user', content: reportText }
           ],
           response_format: { type: 'json_object' },
@@ -354,6 +358,10 @@ export async function analyzeReportWithAIAgent(reportText = '', options = {}) {
           model: llmModel || 'llama3.2',
           messages: [
             { role: 'system', content: SYSTEM_PROMPT },
+            ...FEW_SHOT_EXAMPLES.flatMap(ex => [
+              { role: 'user', content: ex.input },
+              { role: 'assistant', content: JSON.stringify(ex.output) }
+            ]),
             { role: 'user', content: reportText }
           ],
           format: 'json',
