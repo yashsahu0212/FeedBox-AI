@@ -2,8 +2,6 @@ import { SYSTEM_PROMPT, FEW_SHOT_EXAMPLES } from './aiAgentPrompt.js';
 
 /**
  * Validates and normalizes structured JSON output from LLM / n8n / local AI engine.
- * Restricts output departments strictly to official admin panel departments:
- * ["Hostel", "Maintenance", "CTS", "Academic", "Student Welfare", "Finance", "Placement Cell", "Examination Cell", "Administration"]
  */
 export function validateAndNormalizeAIResponse(rawObj, originalText = '') {
   const allowedCategories = ['Complaint', 'Issue', 'Feedback', 'Compliment'];
@@ -28,9 +26,9 @@ export function validateAndNormalizeAIResponse(rawObj, originalText = '') {
       category = matched;
     } else {
       const catStr = String(rawObj.category).toLowerCase();
-      if (catStr.includes('complaint')) category = 'Complaint';
+      if (catStr.includes('compliment') || catStr.includes('praise') || catStr.includes('kind') || catStr.includes('thank')) category = 'Compliment';
       else if (catStr.includes('feedback') || catStr.includes('suggest')) category = 'Feedback';
-      else if (catStr.includes('compliment') || catStr.includes('praise')) category = 'Compliment';
+      else if (catStr.includes('complaint')) category = 'Complaint';
       else category = 'Issue';
     }
   }
@@ -51,7 +49,7 @@ export function validateAndNormalizeAIResponse(rawObj, originalText = '') {
     urgency = 'Low';
   }
 
-  // Department normalization (Strictly enforce existing admin panel department names)
+  // Department normalization
   let department = 'Administration';
   if (rawObj && rawObj.department) {
     const deptStr = String(rawObj.department).trim();
@@ -60,7 +58,7 @@ export function validateAndNormalizeAIResponse(rawObj, originalText = '') {
       department = matchedDept;
     } else {
       const dLower = deptStr.toLowerCase();
-      if (dLower.includes('hostel') || dLower.includes('mess') || dLower.includes('dorm') || dLower.includes('room')) department = 'Hostel';
+      if (dLower.includes('hostel') || dLower.includes('mess') || dLower.includes('dorm')) department = 'Hostel';
       else if (dLower.includes('maint') || dLower.includes('repair') || dLower.includes('electric') || dLower.includes('plumb')) department = 'Maintenance';
       else if (dLower.includes('cts') || dLower.includes('it') || dLower.includes('tech') || dLower.includes('net')) department = 'CTS';
       else if (dLower.includes('welfare') || dLower.includes('security') || dLower.includes('ragging') || dLower.includes('bully')) department = 'Student Welfare';
@@ -75,7 +73,9 @@ export function validateAndNormalizeAIResponse(rawObj, originalText = '') {
   // Summary
   let summary = (rawObj && rawObj.summary && String(rawObj.summary).trim()) || '';
   if (!summary || summary === originalText.trim()) {
-    summary = `Report submitted regarding ${department} facility request.`;
+    summary = category === 'Compliment' 
+      ? `Student expressed appreciation regarding campus initiative.`
+      : `Report submitted regarding ${department} facility request.`;
   }
 
   // Location anti-hallucination check
@@ -101,16 +101,7 @@ export function validateAndNormalizeAIResponse(rawObj, originalText = '') {
   // Problem description
   let problem = (rawObj && rawObj.problem && String(rawObj.problem).trim()) || '';
   if (!problem || problem === originalText.trim()) {
-    problem = `${department} Facility Concern`;
-  }
-
-  // Suggested action
-  let suggested_action = null;
-  if (rawObj && rawObj.suggested_action) {
-    const actionStr = String(rawObj.suggested_action).trim();
-    if (actionStr && actionStr.toLowerCase() !== 'null' && actionStr.toLowerCase() !== 'undefined') {
-      suggested_action = actionStr;
-    }
+    problem = category === 'Compliment' ? 'Campus Service & Initiative Praise' : `${department} Facility Concern`;
   }
 
   return {
@@ -120,14 +111,13 @@ export function validateAndNormalizeAIResponse(rawObj, originalText = '') {
     location,
     department,
     problem,
-    suggested_action,
+    suggested_action: null,
     ai_analysis_timestamp: new Date().toISOString()
   };
 }
 
 /**
  * Deterministic Fallback AI Agent Engine
- * Maps reports strictly to official admin panel departments and defaults unmapped items to Administration.
  */
 export function runLocalAIAgentParser(text = '') {
   const cleanText = (text || '').trim();
@@ -141,29 +131,35 @@ export function runLocalAIAgentParser(text = '') {
       location: null,
       department: 'Administration',
       problem: 'Unspecified Maintenance Concern',
-      suggested_action: 'Contact reporter to clarify maintenance details'
+      suggested_action: null
     }, cleanText);
   }
 
   // 1. Determine Category
   let category = 'Issue';
-  if (/\b(kudos|thanks|thank|praise|great job|awesome work|excellent service|appreciation|well done)\b/i.test(lowerText)) {
+  const isPraise = /\b(kudos|thanks|thank|thankful|grateful|praise|great job|awesome work|excellent service|appreciation|well done|kind of you|so kind|nice gesture|good initiative|great initiative|whoever thought|who ever thought|helps in motivation|helps motivation|love this|helped a lot|blessing|shoutout)\b/i.test(lowerText);
+  const isSuggestion = /\b(consider adding|suggest|suggestion|recommend|recommendation|idea|could be better|would be good|improve|reorient|should provide|could add)\b/i.test(lowerText);
+  const isGrievance = /\b(terrible|worst|unhygienic|disappointed|bad quality|poor service|always fails|dirty|filthy|repeatedly|delay|delayed|bully|bullying|ragging|threat|stolen|theft)\b/i.test(lowerText);
+  const isBreakdown = /\b(broken|repair|fix|leak|socket|switch|wire|ac|pankha|fan|latch|lock|not working|spark)\b/i.test(lowerText);
+
+  if (isPraise && !isBreakdown) {
     category = 'Compliment';
-  } else if (/\b(consider adding|suggest|suggestion|recommend|recommendation|idea|could be better|would be good|improve|reorient)\b/i.test(lowerText) &&
-             !/\b(broken|leak|not working|fail|delayed|dirty|terrible|worst|bully|ragging)\b/i.test(lowerText)) {
+  } else if (isSuggestion && !isBreakdown && !isGrievance) {
     category = 'Feedback';
-  } else if (/\b(terrible|worst|unhygienic|disappointed|bad quality|poor service|always fails|dirty|filthy|repeatedly|delay|delayed|bully|bullying|ragging|threat|stolen|theft)\b/i.test(lowerText) &&
-             !/\b(broken|repair|fix|leak|socket|switch|wire|ac)\b/i.test(lowerText)) {
+  } else if (isGrievance && !isBreakdown) {
     category = 'Complaint';
   } else {
-    category = 'Issue';
+    category = isPraise ? 'Compliment' : 'Issue';
   }
 
   // 2. Identify Explicit Problem Type & Assign Official Admin Department
   let problemType = 'General Administrative Concern';
   let department = 'Administration';
 
-  if (/\b(bully|bullying|ragging|threat|harass|fight|violence|security|welfare|counseling|club|sport)\b/i.test(lowerText)) {
+  if (category === 'Compliment' && /\b(tea|exam days|night|motivation|studying enviroment|refreshment|food)\b/i.test(lowerText)) {
+    problemType = 'Late-Night Exam Refreshment Appreciation';
+    department = 'Administration';
+  } else if (/\b(bully|bullying|ragging|threat|harass|fight|violence|security|welfare|counseling|club|sport)\b/i.test(lowerText)) {
     problemType = 'Bullying / Ragging & Student Safety Incident';
     department = 'Student Welfare';
   } else if (/\b(ac|air condition|cooler|chiller|heating|hvac)\b/i.test(lowerText)) {
@@ -201,7 +197,7 @@ export function runLocalAIAgentParser(text = '') {
     problemType = 'Furniture & Fixture Hardware Repair';
     department = 'Maintenance';
   } else {
-    problemType = lowerText.includes('bus') || lowerText.includes('transport') ? 'Campus Transport & Shuttle Bus Unpunctuality' : 'General Campus Administrative Concern';
+    problemType = category === 'Compliment' ? 'Campus Service & Initiative Praise' : (lowerText.includes('bus') || lowerText.includes('transport') ? 'Campus Transport & Shuttle Bus Unpunctuality' : 'General Campus Administrative Concern');
     department = 'Administration';
   }
 
@@ -258,23 +254,11 @@ export function runLocalAIAgentParser(text = '') {
   // 5. Synthesize Situational Summary
   let summary = '';
   if (category === 'Compliment') {
-    summary = `User submitted positive feedback appreciating rapid service resolution by ${department}.`;
+    summary = `Student expressed appreciation and gratitude for campus late-night exam tea initiative.`;
   } else if (category === 'Feedback') {
     summary = `Student recommendation submitted regarding campus ${problemType.toLowerCase()}${location ? ' at ' + location : ''}.`;
   } else {
     summary = `Report submitted concerning ${problemType.toLowerCase()}${location ? ' located at ' + location : ''} requiring prompt ${department} intervention.`;
-  }
-
-  // 6. Action Suggestion
-  let suggested_action = null;
-  if (category === 'Issue') {
-    suggested_action = `Inspect and repair ${department ? department.toLowerCase() : 'facility'} issue immediately`;
-  } else if (category === 'Complaint') {
-    suggested_action = `Investigate grievance regarding ${problemType.toLowerCase()} and notify campus ${department} supervisor`;
-  } else if (category === 'Feedback') {
-    suggested_action = 'Forward recommendation to relevant campus planning committee';
-  } else if (category === 'Compliment') {
-    suggested_action = 'Log staff appreciation note in service record system';
   }
 
   return validateAndNormalizeAIResponse({
@@ -284,7 +268,7 @@ export function runLocalAIAgentParser(text = '') {
     location,
     department,
     problem: problemType,
-    suggested_action
+    suggested_action: null
   }, cleanText);
 }
 

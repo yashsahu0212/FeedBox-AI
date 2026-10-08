@@ -362,13 +362,6 @@ export default function ReportProblemView({ onSubmitReport, nearbyActivity = [] 
                 </p>
               </div>
 
-              {aiResult.suggested_action && (
-                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-950 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-base text-emerald-700 shrink-0">build</span>
-                  <span><strong>Suggested Action:</strong> {aiResult.suggested_action}</span>
-                </div>
-              )}
-
               {/* Explanation Note */}
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-[#001d36] flex items-center gap-2">
                 <span className="material-symbols-outlined text-base text-[#39618c] shrink-0">info</span>

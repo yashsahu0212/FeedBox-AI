@@ -204,9 +204,6 @@ export default function AdminReportDetailModal({
                 <div className="text-[11px] text-emerald-900 mt-1 bg-white/90 p-2.5 rounded border border-emerald-200 flex flex-col gap-1">
                   <div><strong>AI Summary:</strong> {report.ai_classification.summary || report.title}</div>
                   <div><strong>Main Problem:</strong> {report.ai_classification.problem || report.description}</div>
-                  {report.ai_classification.suggested_action && (
-                    <div><strong>Suggested Action:</strong> {report.ai_classification.suggested_action}</div>
-                  )}
                 </div>
               )}
             </div>
