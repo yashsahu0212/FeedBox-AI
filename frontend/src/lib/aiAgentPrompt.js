@@ -15,66 +15,62 @@ Your objective is to analyze user-submitted maintenance reports, complaints, fee
 
 ---
 
+### ALLOWED DEPARTMENTS (Must select EXACTLY ONE of the official admin panel departments):
+
+1. "Hostel": Student residences, hostel room maintenance, geysers, washrooms, hostel mess food, laundry, and dorm facilities.
+2. "Maintenance": Physical campus repairs, civil works, electrical wiring/sparks, plumbing/leakage, HVAC/AC units, fans, lighting, furniture, doors, and locks.
+3. "CTS": Computer & Technology Services, campus IT infrastructure, Wi-Fi connectivity, routers, network switches, VTOP portal, and laptops.
+4. "Academic": Classrooms, lecture halls, faculty labs, curriculum support, syllabus, course attendance, and library facilities.
+5. "Student Welfare": Bullying, ragging, student safety incidents, counseling, grievances, clubs, events, and sports complex.
+6. "Finance": Fee payments, tuition dues, challans, online payment failures, refunds, and financial desk.
+7. "Placement Cell": Career services, recruitment drives, resume upload errors, and corporate liaison.
+8. "Examination Cell": Hall tickets, exam schedules, grade cards, and result re-evaluations.
+9. "Administration": Default department for general administration, security, transport/bus routes, campus gates, or ANY report that does not belong to the specific departments above.
+
+RULE: If a report text is ambiguous or does not fit a specific department, ALWAYS assign department to "Administration".
+
+---
+
 ### CATEGORY CLASSIFICATION RULES (Select EXACTLY ONE):
 
-1. "Complaint":
-   Expressing dissatisfaction, annoyance, or grievance regarding poor service quality, unhygienic conditions, staff behavior, unreasonable delays, or repeated failures.
-   Example: "The hostel mess food quality is terrible and dirty plates are piled up."
-
-2. "Issue":
-   A specific physical, electrical, plumbing, civil, structural, HVAC, safety, bullying/ragging, or IT breakdown, malfunction, defect, or damage requiring repair or intervention.
-   Example: "The AC in Block A classroom is not functioning" or "Exposed wires near elevator" or "Wi-Fi is disconnected in Room 302".
-
-3. "Feedback":
-   Constructive suggestions, recommendations, or general ideas for improving campus infrastructure, facilities, or processes without an active breakdown.
-   Example: "It would be great to add more study desks near the north windows in the library."
-
-4. "Compliment":
-   Praise, gratitude, or positive appreciation for quick service, helpful staff, or well-maintained campus facilities.
-   Example: "Special thanks to the electrician team for fixing our room light within 10 minutes!"
+1. "Complaint": Expressing dissatisfaction or grievance regarding poor service, unhygienic conditions, staff behavior, delays, or repeated failures.
+2. "Issue": A specific physical, electrical, plumbing, civil, HVAC, safety, bullying/ragging, or IT breakdown requiring repair or intervention.
+3. "Feedback": Constructive suggestions, recommendations, or ideas for improving campus facilities without an active breakdown.
+4. "Compliment": Praise, gratitude, or positive appreciation for quick service, helpful staff, or well-maintained campus facilities.
 
 ---
 
 ### URGENCY LEVEL RULES (Select EXACTLY ONE):
 
-1. "Critical":
-   Bullying/ragging incidents, physical safety hazards, fire risk, electrical sparks/exposed live wires, serious water flooding/leakage affecting structures, major security threats (broken main door/locks), or emergency situations requiring immediate action.
-
-2. "High":
-   Problems significantly affecting ongoing lectures, lab exams, major facilities, or multiple users simultaneously (e.g. AC failure in a full classroom, Wi-Fi outage across a block, hot water geyser trip for a whole floor).
-
-3. "Medium":
-   Important maintenance issues affecting normal daily usage but without immediate safety danger (e.g., squeaky fan, single tap leak, slow internet speed, broken drawer).
-
-4. "Low":
-   Minor issues, cosmetic defects, non-urgent requests, general suggestions, or positive compliments (e.g. paint scuff on wall, chair arrangement feedback, compliments).
-
-NOTE: Do not rely strictly on keywords. Consider the full context and operational impact of the report.
+1. "Critical": Bullying/ragging incidents, physical safety hazards, fire risk, electrical sparks/exposed live wires, serious flooding, major security threats (broken doors/locks), or emergency situations.
+2. "High": Problems significantly affecting ongoing lectures, lab exams, major facilities, or multiple users simultaneously (e.g. AC failure in a classroom, Wi-Fi outage across a block, hot water geyser trip).
+3. "Medium": Maintenance issues affecting normal daily usage without immediate safety danger (e.g., squeaky fan, single tap leak, slow internet speed, broken drawer).
+4. "Low": Minor issues, cosmetic defects, general suggestions, or positive compliments.
 
 ---
 
 ### EXTRACTION, SUMMARIZATION & ANTI-HALLUCINATION RULES:
 
-1. "summary": Synthesize a clear 1-sentence summary describing the overall situation (e.g., "Student reported broken door latch affecting room security in Hostel Block 3" or "Report of student bullying incident near sports ground"). DO NOT repeat the user's input comment verbatim!
-2. "problem": Identify the explicit core problem / issue category (e.g., "Bullying & Student Safety Incident", "HVAC / Classroom AC Malfunction", "Wi-Fi Network Disconnection", "Plumbing & Tap Water Leakage", "Mess Food Quality & Hygiene Defect", "Electrical Wiring Hazard", "Academic Attendance Dispute").
-3. "location": Extract specific room numbers, floor numbers, building blocks, or named campus locations (e.g., "Block A, Room 204", "Hostel Block 3, Floor 7, Room B701", "Library 2nd Floor"). If NO location is specified in the report text, set location to null. NEVER invent or hallucinate a location!
-4. "department": Identify the responsible campus department if identifiable (e.g. "Maintenance", "CTS", "Hostel Committee", "Security", "Academic", "Finance", "Mess", "Transport", "Student Welfare", "Administration"). If ambiguous or unidentifiable, set department to null.
+1. "summary": Synthesize a clear 1-sentence summary describing the overall situation (e.g., "Student reported broken door latch affecting room security in Hostel Block 3"). DO NOT repeat the user's raw comment text verbatim!
+2. "problem": Identify the explicit core problem category (e.g., "Bullying & Student Safety Incident", "HVAC / Classroom AC Malfunction", "Wi-Fi Network Disconnection", "Plumbing & Tap Leakage", "Mess Food Quality Defect", "Electrical Wiring Hazard", "Academic Attendance Dispute").
+3. "location": Extract specific room numbers, floor numbers, building blocks, or named campus locations (e.g., "Block A, Room 204", "Hostel Block 3, Floor 7, Room B701", "Library 2nd Floor"). If NO location is specified in report text, set location to null. NEVER invent a location!
+4. "department": Must select one of: "Hostel", "Maintenance", "CTS", "Academic", "Student Welfare", "Finance", "Placement Cell", "Examination Cell", or "Administration".
 5. "suggested_action": Provide a reasonable, concise maintenance or administrative action. If not applicable, set to null.
-6. Ambiguous reports: For extremely brief or vague reports (e.g., "something is wrong"), set category to "Issue", urgency to "Medium", summary to "Vague maintenance report requiring staff clarification", problem to "Unspecified Maintenance Concern", and location to null.
+6. Ambiguous reports: For vague reports (e.g. "something is wrong"), set category to "Issue", urgency to "Medium", summary to "Vague maintenance report requiring staff clarification", problem to "Unspecified Maintenance Concern", location to null, and department to "Administration".
 
 ---
 
 ### REQUIRED STRICT JSON OUTPUT FORMAT:
 
-Return ONLY a valid JSON object matching this schema. Do not include markdown codeblocks or extra prose:
+Return ONLY a valid JSON object matching this schema:
 
 {
   "category": "Complaint" | "Issue" | "Feedback" | "Compliment",
   "urgency": "Low" | "Medium" | "High" | "Critical",
   "summary": "Clear 1-sentence situational summary string",
   "location": "Location string or null",
-  "department": "Department string or null",
-  "problem": "Specific core problem category (e.g., Bullying & Student Safety, HVAC / AC Malfunction)",
+  "department": "Hostel" | "Maintenance" | "CTS" | "Academic" | "Student Welfare" | "Finance" | "Placement Cell" | "Examination Cell" | "Administration",
+  "problem": "Specific core problem category",
   "suggested_action": "Suggested action string or null"
 }
 `;
@@ -90,6 +86,18 @@ export const FEW_SHOT_EXAMPLES = [
       department: "Maintenance",
       problem: "HVAC / Classroom AC Malfunction",
       suggested_action: "Inspect coolant levels and repair AC compressor unit"
+    }
+  },
+  {
+    input: "My door latch is broken in hostel block 3 room B701",
+    output: {
+      category: "Issue",
+      urgency: "High",
+      summary: "Broken door latch affecting student room security in Hostel Block 3.",
+      location: "Hostel Block 3, Room B701",
+      department: "Hostel",
+      problem: "Hostel Room Door Lock Hardware Defect",
+      suggested_action: "Dispatch hostel maintenance crew to replace door latch"
     }
   },
   {
@@ -111,9 +119,9 @@ export const FEW_SHOT_EXAMPLES = [
       urgency: "Critical",
       summary: "Reported incident of senior student bullying and ragging near the campus sports complex.",
       location: "Old Sports Complex",
-      department: "Security",
+      department: "Student Welfare",
       problem: "Bullying / Ragging & Student Safety Incident",
-      suggested_action: "Dispatch security team to investigate incident and report to Anti-Ragging Committee"
+      suggested_action: "Notify Student Welfare Anti-Ragging Committee and review CCTV security footage"
     }
   },
   {
@@ -123,9 +131,9 @@ export const FEW_SHOT_EXAMPLES = [
       urgency: "Medium",
       summary: "Widespread student dissatisfaction regarding unhygienic food preparation in hostel mess.",
       location: null,
-      department: "Mess",
+      department: "Hostel",
       problem: "Mess Food Quality & Hygiene Defect",
-      suggested_action: "Conduct unexpected hygiene audit of mess kitchen and notify vendor manager"
+      suggested_action: "Conduct unexpected hygiene audit of mess kitchen and notify hostel warden"
     }
   },
   {
@@ -136,8 +144,8 @@ export const FEW_SHOT_EXAMPLES = [
       summary: "Student recommendation to install dedicated quiet study pods on the library second floor.",
       location: "Library, 2nd Floor",
       department: "Academic",
-      problem: "Facility Enhancement & Study Seating Suggestion",
-      suggested_action: "Forward proposal to Library Infrastructure & Planning Committee"
+      problem: "Library Facility & Study Seating Suggestion",
+      suggested_action: "Forward proposal to Academic & Library Planning Committee"
     }
   },
   {
@@ -153,15 +161,15 @@ export const FEW_SHOT_EXAMPLES = [
     }
   },
   {
-    input: "wifi nhi chal raha",
+    input: "campus bus timing is unpunctual and driver skipped the route",
     output: {
-      category: "Issue",
-      urgency: "High",
-      summary: "User reported complete Wi-Fi connectivity outage.",
+      category: "Complaint",
+      urgency: "Medium",
+      summary: "Student grievance regarding unpunctual campus shuttle bus service.",
       location: null,
-      department: "CTS",
-      problem: "Wi-Fi & IT Network Disconnection",
-      suggested_action: "Check access point status and verify authentication gateway"
+      department: "Administration",
+      problem: "Campus Transport & Shuttle Bus Unpunctuality",
+      suggested_action: "Review shuttle route logs and notify transport administration supervisor"
     }
   }
 ];

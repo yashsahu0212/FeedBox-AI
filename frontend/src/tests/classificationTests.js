@@ -18,15 +18,15 @@ export const TEST_SUITE = [
     expectedLocation: 'Hostel Block 2'
   },
   {
-    name: '3. Complaint for Mess food quality',
+    name: '3. Complaint for Mess food quality → Hostel',
     input: 'The hostel mess food quality has been terrible and unhygienic this whole week.',
     expectedCategory: 'Complaint',
     expectedUrgency: 'Medium',
-    expectedDepartment: 'Mess',
+    expectedDepartment: 'Hostel',
     expectedLocationNull: true
   },
   {
-    name: '4. Feedback suggestion for Library',
+    name: '4. Feedback suggestion for Library → Academic',
     input: 'We should consider adding soft study pods in the 2nd floor library reading section.',
     expectedCategory: 'Feedback',
     expectedUrgency: 'Low',
@@ -34,7 +34,7 @@ export const TEST_SUITE = [
     expectedLocation: 'Library'
   },
   {
-    name: '5. Compliment for CTS Wi-Fi repair',
+    name: '5. Compliment for CTS Wi-Fi repair → CTS',
     input: 'Kudos to the CTS team for fixing the Wi-Fi router in Block 3 within 15 minutes!',
     expectedCategory: 'Compliment',
     expectedUrgency: 'Low',
@@ -42,14 +42,14 @@ export const TEST_SUITE = [
     expectedLocation: 'Block 3'
   },
   {
-    name: '6. Bullying / Ragging Incident (Security / Critical)',
+    name: '6. Bullying / Ragging Incident → Student Welfare / Critical',
     input: 'Seniors were bullying and harassing freshers near old sports ground last night.',
     expectedCategory: 'Complaint',
     expectedUrgency: 'Critical',
-    expectedDepartment: 'Security'
+    expectedDepartment: 'Student Welfare'
   },
   {
-    name: '7. Hinglish Wi-Fi Issue',
+    name: '7. Hinglish Wi-Fi Issue → CTS',
     input: 'wifi nhi chal raha',
     expectedCategory: 'Issue',
     expectedUrgency: 'High',
@@ -57,11 +57,11 @@ export const TEST_SUITE = [
     expectedLocationNull: true
   },
   {
-    name: '8. Hinglish Fan Issue',
+    name: '8. Hinglish Fan Issue → Hostel',
     input: 'mere room ka pankha kharab hai',
     expectedCategory: 'Issue',
     expectedUrgency: 'High',
-    expectedDepartment: 'Hostel Committee',
+    expectedDepartment: 'Hostel',
     expectedLocationNull: true
   },
   {
@@ -71,11 +71,11 @@ export const TEST_SUITE = [
     expectedLocationNull: true
   },
   {
-    name: '10. Vague / Ambiguous complaint text',
-    input: 'Something is wrong',
+    name: '10. Vague / Unmapped report → Administration',
+    input: 'Something is wrong with campus transport bus timing',
     expectedCategory: 'Issue',
     expectedUrgency: 'Medium',
-    expectedLocationNull: true
+    expectedDepartment: 'Administration'
   }
 ];
 

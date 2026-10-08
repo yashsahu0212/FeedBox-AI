@@ -2,10 +2,23 @@ import { SYSTEM_PROMPT, FEW_SHOT_EXAMPLES } from './aiAgentPrompt.js';
 
 /**
  * Validates and normalizes structured JSON output from LLM / n8n / local AI engine.
+ * Restricts output departments strictly to official admin panel departments:
+ * ["Hostel", "Maintenance", "CTS", "Academic", "Student Welfare", "Finance", "Placement Cell", "Examination Cell", "Administration"]
  */
 export function validateAndNormalizeAIResponse(rawObj, originalText = '') {
   const allowedCategories = ['Complaint', 'Issue', 'Feedback', 'Compliment'];
   const allowedUrgencies = ['Low', 'Medium', 'High', 'Critical'];
+  const officialDepartments = [
+    'Hostel',
+    'Maintenance',
+    'CTS',
+    'Academic',
+    'Student Welfare',
+    'Finance',
+    'Placement Cell',
+    'Examination Cell',
+    'Administration'
+  ];
 
   // Normalize Category
   let category = 'Issue';
@@ -38,10 +51,31 @@ export function validateAndNormalizeAIResponse(rawObj, originalText = '') {
     urgency = 'Low';
   }
 
-  // Summary (Ensure it does not just echo verbatim input text if input text is long)
+  // Department normalization (Strictly enforce existing admin panel department names)
+  let department = 'Administration';
+  if (rawObj && rawObj.department) {
+    const deptStr = String(rawObj.department).trim();
+    const matchedDept = officialDepartments.find(d => d.toLowerCase() === deptStr.toLowerCase());
+    if (matchedDept) {
+      department = matchedDept;
+    } else {
+      const dLower = deptStr.toLowerCase();
+      if (dLower.includes('hostel') || dLower.includes('mess') || dLower.includes('dorm') || dLower.includes('room')) department = 'Hostel';
+      else if (dLower.includes('maint') || dLower.includes('repair') || dLower.includes('electric') || dLower.includes('plumb')) department = 'Maintenance';
+      else if (dLower.includes('cts') || dLower.includes('it') || dLower.includes('tech') || dLower.includes('net')) department = 'CTS';
+      else if (dLower.includes('welfare') || dLower.includes('security') || dLower.includes('ragging') || dLower.includes('bully')) department = 'Student Welfare';
+      else if (dLower.includes('exam')) department = 'Examination Cell';
+      else if (dLower.includes('place') || dLower.includes('career')) department = 'Placement Cell';
+      else if (dLower.includes('finance') || dLower.includes('account') || dLower.includes('fee')) department = 'Finance';
+      else if (dLower.includes('acad')) department = 'Academic';
+      else department = 'Administration';
+    }
+  }
+
+  // Summary
   let summary = (rawObj && rawObj.summary && String(rawObj.summary).trim()) || '';
   if (!summary || summary === originalText.trim()) {
-    summary = `Report regarding maintenance or facility request (${originalText.slice(0, 60).trim()}...)`;
+    summary = `Report submitted regarding ${department} facility request.`;
   }
 
   // Location anti-hallucination check
@@ -64,19 +98,10 @@ export function validateAndNormalizeAIResponse(rawObj, originalText = '') {
     }
   }
 
-  // Department normalization
-  let department = null;
-  if (rawObj && rawObj.department) {
-    const deptStr = String(rawObj.department).trim();
-    if (deptStr && deptStr.toLowerCase() !== 'null' && deptStr.toLowerCase() !== 'undefined' && deptStr.toLowerCase() !== 'manual_review') {
-      department = deptStr;
-    }
-  }
-
   // Problem description
   let problem = (rawObj && rawObj.problem && String(rawObj.problem).trim()) || '';
   if (!problem || problem === originalText.trim()) {
-    problem = 'Facility or Maintenance Concern';
+    problem = `${department} Facility Concern`;
   }
 
   // Suggested action
@@ -102,7 +127,7 @@ export function validateAndNormalizeAIResponse(rawObj, originalText = '') {
 
 /**
  * Deterministic Fallback AI Agent Engine
- * Synthesizes clear situational summaries and identifies explicit problem categories.
+ * Maps reports strictly to official admin panel departments and defaults unmapped items to Administration.
  */
 export function runLocalAIAgentParser(text = '') {
   const cleanText = (text || '').trim();
@@ -134,13 +159,13 @@ export function runLocalAIAgentParser(text = '') {
     category = 'Issue';
   }
 
-  // 2. Identify Explicit Problem Type / Category & Topic
-  let problemType = 'Facility & Maintenance Concern';
-  let department = 'Maintenance';
+  // 2. Identify Explicit Problem Type & Assign Official Admin Department
+  let problemType = 'General Administrative Concern';
+  let department = 'Administration';
 
-  if (/\b(bully|bullying|ragging|threat|harass|fight|violence|security)\b/i.test(lowerText)) {
+  if (/\b(bully|bullying|ragging|threat|harass|fight|violence|security|welfare|counseling|club|sport)\b/i.test(lowerText)) {
     problemType = 'Bullying / Ragging & Student Safety Incident';
-    department = 'Security';
+    department = 'Student Welfare';
   } else if (/\b(ac|air condition|cooler|chiller|heating|hvac)\b/i.test(lowerText)) {
     problemType = 'HVAC / Classroom AC Malfunction';
     department = 'Maintenance';
@@ -153,26 +178,30 @@ export function runLocalAIAgentParser(text = '') {
   } else if (/\b(tap|leak|leakage|plumb|plumbing|geyser|water|flush|pipe|drainage)\b/i.test(lowerText)) {
     problemType = 'Plumbing & Tap Water Leakage Defect';
     department = 'Maintenance';
-  } else if (/\b(food|mess|canteen|meal|breakfast|lunch|dinner|oily|hygiene|dirty dishes)\b/i.test(lowerText)) {
-    problemType = 'Mess Food Quality & Hygiene Defect';
-    department = 'Mess';
+  } else if (/\b(food|mess|canteen|meal|breakfast|lunch|dinner|oily|hygiene|dirty dishes|dorm|warden|washroom|bathroom|hostel|room change|pankha|fan|mere room|my room|room ka|latch|bed|chair)\b/i.test(lowerText)) {
+    problemType = lowerText.includes('food') || lowerText.includes('mess') || lowerText.includes('canteen')
+      ? 'Mess Food Quality & Hygiene Defect'
+      : 'Hostel Room & Residence Maintenance';
+    department = 'Hostel';
   } else if (/\b(library|study pod|exam|grade|mark|attendance|class|lecture|syllabus|academic|prof)\b/i.test(lowerText)) {
-    problemType = lowerText.includes('library') ? 'Library Facility & Study Seating Suggestion' : 'Academic Attendance & Course Evaluation Dispute';
-    department = 'Academic';
-  } else if (/\b(bus|cab|transport|driver|route|shuttle)\b/i.test(lowerText)) {
-    problemType = 'Campus Transport & Bus Unpunctuality';
-    department = 'Transport';
+    if (lowerText.includes('exam') || lowerText.includes('hall ticket') || lowerText.includes('grade')) {
+      problemType = 'Exam Schedule & Result Evaluation Issue';
+      department = 'Examination Cell';
+    } else {
+      problemType = lowerText.includes('library') ? 'Library Facility & Study Seating Suggestion' : 'Academic Attendance & Course Evaluation Dispute';
+      department = 'Academic';
+    }
+  } else if (/\b(placement|interview|resume|recruit|company|drive|offer|internship|tpo)\b/i.test(lowerText)) {
+    problemType = 'Placement Registration & Recruitment Drive Issue';
+    department = 'Placement Cell';
   } else if (/\b(fee|challan|payment|finance|receipt|dues)\b/i.test(lowerText)) {
     problemType = 'Fee Payment & Financial Receipt Dispute';
     department = 'Finance';
   } else if (/\b(door|latch|lock|chair|table|desk|bed|cupboard|furniture|carpenter)\b/i.test(lowerText)) {
     problemType = 'Furniture & Fixture Hardware Repair';
     department = 'Maintenance';
-  } else if (/\b(hostel|room|geyser|warden|dorm|washroom|bathroom|cleaning|housekeeping)\b/i.test(lowerText)) {
-    problemType = 'Hostel Hygiene & Room Maintenance';
-    department = 'Hostel Committee';
   } else {
-    problemType = 'General Campus Maintenance Concern';
+    problemType = lowerText.includes('bus') || lowerText.includes('transport') ? 'Campus Transport & Shuttle Bus Unpunctuality' : 'General Campus Administrative Concern';
     department = 'Administration';
   }
 
@@ -226,7 +255,7 @@ export function runLocalAIAgentParser(text = '') {
     location = null;
   }
 
-  // 5. Synthesize Situational Summary (NOT verbatim comment echo!)
+  // 5. Synthesize Situational Summary
   let summary = '';
   if (category === 'Compliment') {
     summary = `User submitted positive feedback appreciating rapid service resolution by ${department}.`;
@@ -241,7 +270,7 @@ export function runLocalAIAgentParser(text = '') {
   if (category === 'Issue') {
     suggested_action = `Inspect and repair ${department ? department.toLowerCase() : 'facility'} issue immediately`;
   } else if (category === 'Complaint') {
-    suggested_action = `Investigate grievance regarding ${problemType.toLowerCase()} and notify campus supervisor`;
+    suggested_action = `Investigate grievance regarding ${problemType.toLowerCase()} and notify campus ${department} supervisor`;
   } else if (category === 'Feedback') {
     suggested_action = 'Forward recommendation to relevant campus planning committee';
   } else if (category === 'Compliment') {
