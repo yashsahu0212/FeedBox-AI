@@ -76,6 +76,13 @@ export const TEST_SUITE = [
     expectedCategory: 'Issue',
     expectedUrgency: 'Medium',
     expectedDepartment: 'Administration'
+  },
+  {
+    name: '11. Exam night tea praise → Compliment',
+    input: 'who ever thought of giving tea on exam days at night is so kind of you it also helps in motivation and keeping the studying enviroment',
+    expectedCategory: 'Compliment',
+    expectedUrgency: 'Low',
+    expectedDepartment: 'Administration'
   }
 ];
 

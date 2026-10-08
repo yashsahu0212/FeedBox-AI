@@ -254,7 +254,7 @@ export function runLocalAIAgentParser(text = '') {
   // 5. Synthesize Situational Summary
   let summary = '';
   if (category === 'Compliment') {
-    summary = `Student expressed appreciation and gratitude for campus late-night exam tea initiative.`;
+    summary = `Student expressed appreciation and gratitude for ${problemType.toLowerCase()}${location ? ' at ' + location : ''}.`;
   } else if (category === 'Feedback') {
     summary = `Student recommendation submitted regarding campus ${problemType.toLowerCase()}${location ? ' at ' + location : ''}.`;
   } else {
