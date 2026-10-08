@@ -42,7 +42,14 @@ export const TEST_SUITE = [
     expectedLocation: 'Block 3'
   },
   {
-    name: '6. Hinglish Wi-Fi Issue',
+    name: '6. Bullying / Ragging Incident (Security / Critical)',
+    input: 'Seniors were bullying and harassing freshers near old sports ground last night.',
+    expectedCategory: 'Complaint',
+    expectedUrgency: 'Critical',
+    expectedDepartment: 'Security'
+  },
+  {
+    name: '7. Hinglish Wi-Fi Issue',
     input: 'wifi nhi chal raha',
     expectedCategory: 'Issue',
     expectedUrgency: 'High',
@@ -50,7 +57,7 @@ export const TEST_SUITE = [
     expectedLocationNull: true
   },
   {
-    name: '7. Hinglish Fan Issue',
+    name: '8. Hinglish Fan Issue',
     input: 'mere room ka pankha kharab hai',
     expectedCategory: 'Issue',
     expectedUrgency: 'High',
@@ -58,13 +65,13 @@ export const TEST_SUITE = [
     expectedLocationNull: true
   },
   {
-    name: '8. Anti-hallucination location test (missing location -> null)',
+    name: '9. Anti-hallucination location test (missing location -> null)',
     input: 'The water tap is leaking everywhere',
     expectedCategory: 'Issue',
     expectedLocationNull: true
   },
   {
-    name: '9. Vague / Ambiguous complaint text',
+    name: '10. Vague / Ambiguous complaint text',
     input: 'Something is wrong',
     expectedCategory: 'Issue',
     expectedUrgency: 'Medium',
@@ -106,6 +113,12 @@ export function runClassificationTests() {
     if (test.expectedLocationNull && output.location !== null) {
       passed = false;
       failures.push(`Expected location to be null, got "${output.location}"`);
+    }
+
+    // Verify summary & problem are NOT verbatim input echoes
+    if (output.summary === test.input || output.problem === test.input) {
+      passed = false;
+      failures.push(`Summary or Problem is echoing raw input verbatim`);
     }
 
     if (passed) {

@@ -34,15 +34,15 @@ export function validateAndNormalizeAIResponse(rawObj, originalText = '') {
     urgency = prioMap[String(rawObj.priority).toLowerCase()] || 'Medium';
   }
 
-  // Compliments are always Low urgency
   if (category === 'Compliment') {
     urgency = 'Low';
   }
 
-  // Summary
-  const summary = (rawObj && rawObj.summary && String(rawObj.summary).trim()) ||
-                  (originalText.slice(0, 90).trim() + (originalText.length > 90 ? '...' : '')) ||
-                  'Maintenance report submitted';
+  // Summary (Ensure it does not just echo verbatim input text if input text is long)
+  let summary = (rawObj && rawObj.summary && String(rawObj.summary).trim()) || '';
+  if (!summary || summary === originalText.trim()) {
+    summary = `Report regarding maintenance or facility request (${originalText.slice(0, 60).trim()}...)`;
+  }
 
   // Location anti-hallucination check
   let location = null;
@@ -74,10 +74,10 @@ export function validateAndNormalizeAIResponse(rawObj, originalText = '') {
   }
 
   // Problem description
-  const problem = (rawObj && rawObj.problem && String(rawObj.problem).trim()) ||
-                  (rawObj && rawObj.issue_summary && String(rawObj.issue_summary).trim()) ||
-                  originalText.trim() ||
-                  'Reported maintenance concern';
+  let problem = (rawObj && rawObj.problem && String(rawObj.problem).trim()) || '';
+  if (!problem || problem === originalText.trim()) {
+    problem = 'Facility or Maintenance Concern';
+  }
 
   // Suggested action
   let suggested_action = null;
@@ -102,6 +102,7 @@ export function validateAndNormalizeAIResponse(rawObj, originalText = '') {
 
 /**
  * Deterministic Fallback AI Agent Engine
+ * Synthesizes clear situational summaries and identifies explicit problem categories.
  */
 export function runLocalAIAgentParser(text = '') {
   const cleanText = (text || '').trim();
@@ -114,32 +115,74 @@ export function runLocalAIAgentParser(text = '') {
       summary: 'Vague maintenance report requiring clarification',
       location: null,
       department: 'Administration',
-      problem: cleanText || 'Unspecified user maintenance report',
+      problem: 'Unspecified Maintenance Concern',
       suggested_action: 'Contact reporter to clarify maintenance details'
     }, cleanText);
   }
 
-  // 1. Determine Category according to system prompt rules
+  // 1. Determine Category
   let category = 'Issue';
   if (/\b(kudos|thanks|thank|praise|great job|awesome work|excellent service|appreciation|well done)\b/i.test(lowerText)) {
     category = 'Compliment';
   } else if (/\b(consider adding|suggest|suggestion|recommend|recommendation|idea|could be better|would be good|improve|reorient)\b/i.test(lowerText) &&
-             !/\b(broken|leak|not working|fail|delayed|dirty|terrible|worst)\b/i.test(lowerText)) {
+             !/\b(broken|leak|not working|fail|delayed|dirty|terrible|worst|bully|ragging)\b/i.test(lowerText)) {
     category = 'Feedback';
-  } else if (/\b(terrible|worst|unhygienic|disappointed|bad quality|poor service|always fails|dirty|filthy|repeatedly|delay|delayed)\b/i.test(lowerText) &&
+  } else if (/\b(terrible|worst|unhygienic|disappointed|bad quality|poor service|always fails|dirty|filthy|repeatedly|delay|delayed|bully|bullying|ragging|threat|stolen|theft)\b/i.test(lowerText) &&
              !/\b(broken|repair|fix|leak|socket|switch|wire|ac)\b/i.test(lowerText)) {
     category = 'Complaint';
   } else {
     category = 'Issue';
   }
 
-  // 2. Determine Urgency according to system prompt rules
+  // 2. Identify Explicit Problem Type / Category & Topic
+  let problemType = 'Facility & Maintenance Concern';
+  let department = 'Maintenance';
+
+  if (/\b(bully|bullying|ragging|threat|harass|fight|violence|security)\b/i.test(lowerText)) {
+    problemType = 'Bullying / Ragging & Student Safety Incident';
+    department = 'Security';
+  } else if (/\b(ac|air condition|cooler|chiller|heating|hvac)\b/i.test(lowerText)) {
+    problemType = 'HVAC / Classroom AC Malfunction';
+    department = 'Maintenance';
+  } else if (/\b(wifi|wi-fi|internet|net|portal|vtop|laptop|router|ip|network|cts)\b/i.test(lowerText)) {
+    problemType = 'Wi-Fi & IT Network Disconnection';
+    department = 'CTS';
+  } else if (/\b(spark|sparks|sparking|exposed wire|wire|wiring|electric|electrical|switch|socket|power cut)\b/i.test(lowerText)) {
+    problemType = 'Electrical Wiring & Sparking Safety Hazard';
+    department = 'Maintenance';
+  } else if (/\b(tap|leak|leakage|plumb|plumbing|geyser|water|flush|pipe|drainage)\b/i.test(lowerText)) {
+    problemType = 'Plumbing & Tap Water Leakage Defect';
+    department = 'Maintenance';
+  } else if (/\b(food|mess|canteen|meal|breakfast|lunch|dinner|oily|hygiene|dirty dishes)\b/i.test(lowerText)) {
+    problemType = 'Mess Food Quality & Hygiene Defect';
+    department = 'Mess';
+  } else if (/\b(library|study pod|exam|grade|mark|attendance|class|lecture|syllabus|academic|prof)\b/i.test(lowerText)) {
+    problemType = lowerText.includes('library') ? 'Library Facility & Study Seating Suggestion' : 'Academic Attendance & Course Evaluation Dispute';
+    department = 'Academic';
+  } else if (/\b(bus|cab|transport|driver|route|shuttle)\b/i.test(lowerText)) {
+    problemType = 'Campus Transport & Bus Unpunctuality';
+    department = 'Transport';
+  } else if (/\b(fee|challan|payment|finance|receipt|dues)\b/i.test(lowerText)) {
+    problemType = 'Fee Payment & Financial Receipt Dispute';
+    department = 'Finance';
+  } else if (/\b(door|latch|lock|chair|table|desk|bed|cupboard|furniture|carpenter)\b/i.test(lowerText)) {
+    problemType = 'Furniture & Fixture Hardware Repair';
+    department = 'Maintenance';
+  } else if (/\b(hostel|room|geyser|warden|dorm|washroom|bathroom|cleaning|housekeeping)\b/i.test(lowerText)) {
+    problemType = 'Hostel Hygiene & Room Maintenance';
+    department = 'Hostel Committee';
+  } else {
+    problemType = 'General Campus Maintenance Concern';
+    department = 'Administration';
+  }
+
+  // 3. Determine Urgency according to system prompt rules
   let urgency = 'Medium';
-  const isSafetyEmergency = /\b(spark|sparks|sparking|hazard|fire|exposed wire|exposed live|electric shock|flooding|flood|emergency|danger|dangerous|theft|stolen|broken lock)\b/i.test(lowerText);
+  const isSafetyEmergency = /\b(bully|bullying|ragging|threat|spark|sparks|sparking|hazard|fire|exposed wire|exposed live|electric shock|flooding|flood|emergency|danger|dangerous|theft|stolen|broken lock)\b/i.test(lowerText);
   const isHighImpact = /\b(ac|air condition|wifi|wi-fi|internet|geyser|exam|lecture|classroom|pankha|fan|no water|power cut|asap|urgent|immediately)\b/i.test(lowerText);
   const isLowUrgency = /\b(minor|paint|scuff|squeak|drawer|chair|table|desk|slow|suggestion|feedback)\b/i.test(lowerText);
 
-  if (category === 'Compliment' || category === 'Feedback' || isLowUrgency) {
+  if (category === 'Compliment' || (category === 'Feedback' && !isSafetyEmergency) || isLowUrgency) {
     urgency = 'Low';
   } else if (isSafetyEmergency) {
     urgency = 'Critical';
@@ -149,7 +192,7 @@ export function runLocalAIAgentParser(text = '') {
     urgency = 'Medium';
   }
 
-  // 3. Location Extraction Rules (Strict anti-hallucination)
+  // 4. Location Extraction Rules
   let location = null;
   const hostelBlockMatch = cleanText.match(/\b(?:hostel block|block|blk)\s*[-–]?\s*([a-zA-Z0-9]+)\b/i);
   const floorMatch = cleanText.match(/\b(\d+)(?:st|nd|rd|th)?\s*floor\b/i) || cleanText.match(/\bfloor\s*(\d+)\b/i);
@@ -183,47 +226,35 @@ export function runLocalAIAgentParser(text = '') {
     location = null;
   }
 
-  // 4. Department Identification Rules
-  let department = null;
-  if (/\b(wifi|wi-fi|internet|net|portal|vtop|laptop|router|ip|network|cts)\b/i.test(lowerText)) {
-    department = 'CTS';
-  } else if (/\b(ac|air condition|light|wire|wiring|spark|sparking|electrical|elevator|lift|tap|water|leak|door|pipe|repair|maint)\b/i.test(lowerText)) {
-    department = 'Maintenance';
-  } else if (/\b(food|mess|canteen|meal|breakfast|lunch|dinner|oily|hygiene)\b/i.test(lowerText)) {
-    department = 'Mess';
-  } else if (/\b(geyser|warden|dorm|washroom|bathroom|toilet|mere room|my room|room ka|pankha|fan|latch|bed|chair)\b/i.test(lowerText)) {
-    department = 'Hostel Committee';
-  } else if (/\b(security|gate|theft|id card|stolen|guard|unauthorized)\b/i.test(lowerText)) {
-    department = 'Security';
-  } else if (/\b(library|study pod|exam|grade|mark|lecture|syllabus|academic|prof)\b/i.test(lowerText)) {
-    department = 'Academic';
-  } else if (/\b(bus|cab|transport|driver|route)\b/i.test(lowerText)) {
-    department = 'Transport';
-  } else if (/\b(fee|challan|payment|finance|receipt|dues)\b/i.test(lowerText)) {
-    department = 'Finance';
+  // 5. Synthesize Situational Summary (NOT verbatim comment echo!)
+  let summary = '';
+  if (category === 'Compliment') {
+    summary = `User submitted positive feedback appreciating rapid service resolution by ${department}.`;
+  } else if (category === 'Feedback') {
+    summary = `Student recommendation submitted regarding campus ${problemType.toLowerCase()}${location ? ' at ' + location : ''}.`;
   } else {
-    department = 'Administration';
+    summary = `Report submitted concerning ${problemType.toLowerCase()}${location ? ' located at ' + location : ''} requiring prompt ${department} intervention.`;
   }
 
-  // 5. Action Suggestion
+  // 6. Action Suggestion
   let suggested_action = null;
   if (category === 'Issue') {
-    suggested_action = `Inspect and repair ${department ? department.toLowerCase() : 'maintenance'} issue`;
+    suggested_action = `Inspect and repair ${department ? department.toLowerCase() : 'facility'} issue immediately`;
   } else if (category === 'Complaint') {
-    suggested_action = 'Investigate grievance and notify department supervisor';
+    suggested_action = `Investigate grievance regarding ${problemType.toLowerCase()} and notify campus supervisor`;
   } else if (category === 'Feedback') {
-    suggested_action = 'Forward suggestion to department planning committee';
+    suggested_action = 'Forward recommendation to relevant campus planning committee';
   } else if (category === 'Compliment') {
-    suggested_action = 'Log staff appreciation note in service system';
+    suggested_action = 'Log staff appreciation note in service record system';
   }
 
   return validateAndNormalizeAIResponse({
     category,
     urgency,
-    summary: cleanText.length > 80 ? cleanText.slice(0, 77) + '...' : cleanText,
+    summary,
     location,
     department,
-    problem: cleanText,
+    problem: problemType,
     suggested_action
   }, cleanText);
 }
