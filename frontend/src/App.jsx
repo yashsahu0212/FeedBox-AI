@@ -17,7 +17,7 @@ import {
   getLocalReports
 } from './lib/supabase';
 
-export default function App() {
+function AppContent() {
   // Navigation state
   const [currentPath, setCurrentPath] = useState('student-home');
   const [selectedTicketId, setSelectedTicketId] = useState('TICK-8842');
@@ -206,5 +206,56 @@ export default function App() {
         />
       )}
     </div>
+  );
+}
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('UI Rendering Error caught by ErrorBoundary:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center p-6 bg-[#fdf8f8]">
+          <div className="bg-white p-8 rounded-2xl shadow-xl border border-red-200 max-w-md w-full flex flex-col items-center text-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+              <span className="material-symbols-outlined text-2xl">warning</span>
+            </div>
+            <h2 className="text-lg font-bold text-[#1c1b1c]">Something went wrong</h2>
+            <p className="text-xs text-[#77767b]">
+              An unexpected UI error occurred. Click below to reload the app cleanly.
+            </p>
+            <button
+              onClick={() => {
+                this.setState({ hasError: false, error: null });
+                window.location.reload();
+              }}
+              className="px-5 py-2.5 rounded-xl bg-[#1b1b1e] text-white text-xs font-semibold hover:bg-[#313030] transition-colors"
+            >
+              Reload Application
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+export default function App() {
+  return (
+    <ErrorBoundary>
+      <AppContent />
+    </ErrorBoundary>
   );
 }

@@ -472,8 +472,21 @@ export async function submitNewReport(reportData) {
   const categoryEnum = ['Complaint', 'Issue', 'Feedback', 'Compliment'].find(c => c.toLowerCase() === (aiAnalysis.category || reportData.category || '').toLowerCase()) || 'Issue';
   const urgencyEnum = ['Low', 'Medium', 'High', 'Critical'].find(u => u.toLowerCase() === (aiAnalysis.urgency || reportData.urgency || '').toLowerCase()) || 'Medium';
 
+  const locString = typeof reportData.location === 'string'
+    ? reportData.location
+    : (typeof aiAnalysis.location === 'string'
+        ? aiAnalysis.location
+        : (aiAnalysis.location && typeof aiAnalysis.location === 'object'
+            ? Object.values(aiAnalysis.location).filter(Boolean).join(', ')
+            : 'Campus Main'));
+
+  // Valid UUID generator for PostgreSQL
+  const reportUuid = (typeof crypto !== 'undefined' && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : '22222222-2222-2222-2222-' + Math.floor(100000000000 + Math.random() * 900000000000);
+
   const newReport = {
-    id: `rep-${Math.random().toString(36).substr(2, 9)}`,
+    id: reportUuid,
     title: reportData.title || aiAnalysis.summary || 'Maintenance Report',
     description: reportData.description || aiAnalysis.problem || '',
     category: categoryEnum.toLowerCase(),
@@ -481,13 +494,13 @@ export async function submitNewReport(reportData) {
     status: 'submitted',
     department_id: assignedDept.id,
     department_name: assignedDept.name,
-    location: reportData.location || aiAnalysis.location || 'Campus Main',
+    location: locString,
     attachment_url: reportData.attachedPhoto || null,
     ai_classification: {
       category: categoryEnum,
       urgency: urgencyEnum,
       summary: aiAnalysis.summary || reportData.title,
-      location: aiAnalysis.location || reportData.location || null,
+      location: typeof aiAnalysis.location === 'string' ? aiAnalysis.location : locString,
       department: assignedDept.name,
       problem: aiAnalysis.problem || reportData.description,
       suggested_action: aiAnalysis.suggested_action || null,
@@ -501,8 +514,30 @@ export async function submitNewReport(reportData) {
 
   // Real Supabase insert if configured
   if (import.meta.env.VITE_SUPABASE_URL && !import.meta.env.VITE_SUPABASE_URL.includes('demo')) {
-    const { data, error } = await supabase.from('reports').insert([newReport]).select().single();
-    if (!error) return data;
+    try {
+      // Clean DB payload matching PostgreSQL schema exactly
+      const dbPayload = {
+        id: newReport.id,
+        title: newReport.title,
+        description: newReport.description,
+        category: newReport.category,
+        urgency: newReport.urgency,
+        status: newReport.status,
+        department_id: newReport.department_id,
+        location: newReport.location,
+        attachment_url: newReport.attachment_url,
+        ai_classification: newReport.ai_classification
+      };
+
+      const { data, error } = await supabase.from('reports').insert([dbPayload]).select().single();
+      if (error) {
+        console.warn('Supabase DB Insert Note (Saving to local store):', error.message);
+      } else if (data) {
+        newReport.id = data.id || newReport.id;
+      }
+    } catch (err) {
+      console.warn('Supabase DB Insert Warning:', err.message);
+    }
   }
 
   // Save to local backend

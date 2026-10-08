@@ -54,12 +54,14 @@ export default function ReportProblemView({ onSubmitReport, nearbyActivity = [] 
 
       const locDisplay = typeof classification.location === 'string'
         ? classification.location
-        : (classification.location?.hostel_block || locationText.trim() || null);
+        : (classification.location && typeof classification.location === 'object'
+            ? Object.values(classification.location).filter(Boolean).join(', ')
+            : (locationText.trim() || 'Campus Main'));
 
       const newTicket = {
         title: classification.summary || description.slice(0, 55).trim(),
         description: description.trim(),
-        location: locDisplay || 'Campus Main',
+        location: locDisplay,
         category: classification.category || 'Issue',
         urgency: classification.urgency || 'Medium',
         department: classification.department || 'Administration',
@@ -70,7 +72,7 @@ export default function ReportProblemView({ onSubmitReport, nearbyActivity = [] 
       };
 
       const created = onSubmitReport(newTicket);
-      setSubmittedTicket(created);
+      setSubmittedTicket(created || newTicket);
     } catch (err) {
       console.error('AI Classification failed:', err);
     } finally {
@@ -340,7 +342,11 @@ export default function ReportProblemView({ onSubmitReport, nearbyActivity = [] 
                   Location:
                 </span>
                 <span className="text-xs font-medium text-[#1c1b1c]">
-                  {aiResult.location || <span className="text-[#77767b] italic">null (Not specified)</span>}
+                  {typeof aiResult.location === 'string'
+                    ? aiResult.location
+                    : (aiResult.location && typeof aiResult.location === 'object'
+                        ? Object.values(aiResult.location).filter(Boolean).join(', ')
+                        : <span className="text-[#77767b] italic">null (Not specified)</span>)}
                 </span>
               </div>
 

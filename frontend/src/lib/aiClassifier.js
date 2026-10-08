@@ -1,13 +1,6 @@
 /**
  * LLM AI Agent Classification & Dispatch Engine
  * CampusAI Maintenance Portal
- * 
- * Features:
- * 1. LLM AI Agent using Prompt Engineering, Few-Shot Examples & Structured JSON Outputs.
- * 2. Supported integrations for OpenAI, Gemini, Groq, Ollama, and n8n Webhook workflows.
- * 3. Strict 4-Category System: Complaint, Issue, Feedback, Compliment.
- * 4. Strict 4-Urgency System: Low, Medium, High, Critical.
- * 5. Robust JSON Schema validation and fallback parsing.
  */
 
 import { analyzeReportWithAIAgent, runLocalAIAgentParser, validateAndNormalizeAIResponse } from './aiAgentService.js';
@@ -19,14 +12,7 @@ export { runLocalAIAgentParser, validateAndNormalizeAIResponse };
  */
 export function extractLocation(text = '') {
   const parsed = runLocalAIAgentParser(text);
-  if (!parsed.location) return null;
-  return {
-    hostel_block: parsed.location,
-    floor: null,
-    wing: null,
-    room: null,
-    additional_location: null
-  };
+  return parsed.location || null;
 }
 
 /**
@@ -41,7 +27,7 @@ export function classifyComplaintLocal(text = '') {
     priority: result.urgency.toLowerCase(),
     summary: result.summary,
     issue_summary: result.summary,
-    location: result.location ? { hostel_block: result.location } : null,
+    location: result.location,
     department: result.department || 'Administration',
     problem: result.problem,
     suggested_action: result.suggested_action,
@@ -57,6 +43,12 @@ export function classifyComplaintLocal(text = '') {
 export async function classifyComplaintAI(rawText = '', options = {}) {
   const aiResult = await analyzeReportWithAIAgent(rawText, options);
 
+  const locationString = typeof aiResult.location === 'string'
+    ? aiResult.location
+    : (aiResult.location && typeof aiResult.location === 'object'
+        ? Object.values(aiResult.location).filter(Boolean).join(', ')
+        : null);
+
   return {
     original_text: rawText,
     category: aiResult.category,
@@ -64,7 +56,7 @@ export async function classifyComplaintAI(rawText = '', options = {}) {
     priority: aiResult.urgency.toLowerCase(),
     summary: aiResult.summary,
     issue_summary: aiResult.summary,
-    location: aiResult.location ? { hostel_block: aiResult.location } : null,
+    location: locationString,
     department: aiResult.department || 'Administration',
     problem: aiResult.problem,
     suggested_action: aiResult.suggested_action,
