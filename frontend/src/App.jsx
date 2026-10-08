@@ -133,14 +133,20 @@ function AppContent() {
   }
 
   // Active Admin object for Admin Portal
-  const activeAdminObj = adminUser || (authUser?.userType === 'admin' || authUser?.role?.includes('admin') ? authUser : null);
+  const isAdmin = authUser?.userType === 'admin' || authUser?.role?.includes('admin');
+  const activeAdminObj = adminUser || (isAdmin ? authUser : null);
+
+  // If admin is logged in, ensure currentPath is admin-portal
+  const effectivePath = isAdmin
+    ? 'admin-portal'
+    : (currentPath === 'admin-portal' ? 'student-home' : currentPath);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#fdf8f8] text-[#1c1b1c] font-geist antialiased selection:bg-[#e2dfe1]">
       
       {/* Responsive Fixed Header */}
       <Header
-        currentPath={currentPath}
+        currentPath={effectivePath}
         navigateTo={setCurrentPath}
         activeTicketsCount={activeTicketsCount}
         authUser={authUser}
@@ -149,7 +155,7 @@ function AppContent() {
 
       {/* Main Content View Container */}
       <main className="flex-1 pt-14 pb-12 w-full">
-        {currentPath === 'student-home' && (
+        {!isAdmin && effectivePath === 'student-home' && (
           <HomeView
             tickets={tickets}
             navigateTo={setCurrentPath}
@@ -157,7 +163,7 @@ function AppContent() {
           />
         )}
 
-        {currentPath === 'my-reports' && (
+        {!isAdmin && effectivePath === 'my-reports' && (
           <MyReportsView
             tickets={tickets}
             selectedTicketId={selectedTicketId}
@@ -167,14 +173,14 @@ function AppContent() {
           />
         )}
 
-        {currentPath === 'report-a-problem' && (
+        {!isAdmin && effectivePath === 'report-a-problem' && (
           <ReportProblemView
             onSubmitReport={handleCreateReport}
             nearbyActivity={nearbyActivity}
           />
         )}
 
-        {currentPath === 'admin-portal' && (
+        {isAdmin && (
           activeAdminObj ? (
             <AdminDashboard
               adminUser={activeAdminObj}

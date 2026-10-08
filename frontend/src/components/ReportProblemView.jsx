@@ -245,7 +245,7 @@ export default function ReportProblemView({ onSubmitReport, nearbyActivity = [] 
           <div className="flex items-center justify-between">
             <span className="font-code-sm text-xs font-bold uppercase tracking-wider text-[#39618c] flex items-center gap-1">
               <span className="material-symbols-outlined text-sm text-emerald-500">verified</span>
-              AI Classification & Routing Confirmation
+              Report Summary & Dispatch Status
             </span>
             <button
               type="button"
@@ -269,7 +269,7 @@ export default function ReportProblemView({ onSubmitReport, nearbyActivity = [] 
                     Report Dispatched & Categorized
                   </h2>
                   <p className="font-body-sm text-xs text-[#47464b]">
-                    Ticket ID: <span className="font-mono font-bold text-[#1c1b1c]">{submittedTicket.id}</span> • Confidence: {(aiResult.confidence * 100).toFixed(0)}%
+                    Ticket ID: <span className="font-mono font-bold text-[#1c1b1c]">{submittedTicket.id}</span>
                   </p>
                 </div>
               </div>
@@ -352,20 +352,14 @@ export default function ReportProblemView({ onSubmitReport, nearbyActivity = [] 
 
             </div>
 
-            {/* Problem, Summary & Suggested Action */}
+            {/* Problem & Summary */}
             <div className="flex flex-col gap-3">
               <div>
-                <span className="text-[11px] font-bold text-[#47464b] block mb-0.5">AI Summary & Problem:</span>
+                <span className="text-[11px] font-bold text-[#47464b] block mb-0.5">Summary & Problem:</span>
                 <p className="text-xs text-[#1c1b1c] font-medium bg-[#f7f3f2] p-3 rounded-xl border border-[#e5e2e1]">
                   <strong>Summary:</strong> {aiResult.summary}<br/>
                   <strong>Main Problem:</strong> {aiResult.problem}
                 </p>
-              </div>
-
-              {/* Explanation Note */}
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-[#001d36] flex items-center gap-2">
-                <span className="material-symbols-outlined text-base text-[#39618c] shrink-0">info</span>
-                <span>{aiResult.reason}</span>
               </div>
             </div>
 

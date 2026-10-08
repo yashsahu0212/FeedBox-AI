@@ -33,7 +33,7 @@ export function classifyComplaintLocal(text = '') {
     suggested_action: result.suggested_action,
     confidence: 0.94,
     routing_status: 'auto_routed',
-    reason: `Classified as ${result.category} (${result.urgency} urgency) by AI Agent and routed to ${result.department || 'Administration'}.`
+    reason: `Assigned to ${result.department || 'Administration'} (${result.urgency} urgency).`
   };
 }
 
@@ -62,7 +62,7 @@ export async function classifyComplaintAI(rawText = '', options = {}) {
     suggested_action: aiResult.suggested_action,
     confidence: aiResult.confidence || 0.96,
     routing_status: 'auto_routed',
-    reason: `Analyzed by LLM AI Agent (${aiResult.source}) → ${aiResult.category} (${aiResult.urgency} urgency) assigned to ${aiResult.department || 'Administration'}.`,
+    reason: `Assigned to ${aiResult.department || 'Administration'} (${aiResult.urgency} urgency).`,
     source: aiResult.source,
     ai_analysis_timestamp: aiResult.ai_analysis_timestamp
   };

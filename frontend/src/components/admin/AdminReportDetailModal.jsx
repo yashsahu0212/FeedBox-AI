@@ -139,25 +139,22 @@ export default function AdminReportDetailModal({
               </div>
             </div>
 
-            {/* AI Classification & Admin Override Contract */}
-            <div className="bg-emerald-50/70 p-4 rounded-xl border border-emerald-200 text-xs flex flex-col gap-2">
-              <div className="flex items-center justify-between font-bold text-emerald-950">
+            {/* Department Assignment & Classification */}
+            <div className="bg-[#f7f3f2] p-4 rounded-xl border border-[#e5e2e1] text-xs flex flex-col gap-2">
+              <div className="flex items-center justify-between font-bold text-[#1c1b1c]">
                 <span className="flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-base text-emerald-700">psychology</span>
-                  AI Classification & Admin Override Contract
-                </span>
-                <span className="font-mono text-[10px] bg-emerald-100 px-2 py-0.5 rounded text-emerald-800">
-                  Confidence: {((report.ai_classification?.confidence || 0.95) * 100).toFixed(0)}%
+                  <span className="material-symbols-outlined text-base text-[#39618c]">assignment_turned_in</span>
+                  Department Assignment & Category
                 </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-1 text-slate-800">
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-emerald-900 uppercase">Assigned Dept:</label>
+                  <label className="text-[10px] font-bold text-[#47464b] uppercase">Assigned Dept:</label>
                   <select
                     value={report.department_name || report.department || 'Hostel Committee'}
                     onChange={(e) => onUpdateStatus(report.id, report.status, `Reassigned department to ${e.target.value}`)}
-                    className="bg-white border border-emerald-300 rounded-lg p-1.5 font-bold text-xs cursor-pointer"
+                    className="bg-white border border-[#c8c5cb] rounded-lg p-1.5 font-bold text-xs cursor-pointer text-[#1c1b1c]"
                   >
                     <option value="CTS">CTS (Technical)</option>
                     <option value="Hostel Committee">Hostel Committee</option>
@@ -172,11 +169,11 @@ export default function AdminReportDetailModal({
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-emerald-900 uppercase">Category:</label>
+                  <label className="text-[10px] font-bold text-[#47464b] uppercase">Category:</label>
                   <select
                     value={['Complaint', 'Issue', 'Feedback', 'Compliment'].find(c => c.toLowerCase() === (report.category || '').toLowerCase()) || 'Issue'}
                     onChange={(e) => onUpdateStatus(report.id, report.status, `Updated category to ${e.target.value}`)}
-                    className="bg-white border border-emerald-300 rounded-lg p-1.5 font-bold text-xs cursor-pointer"
+                    className="bg-white border border-[#c8c5cb] rounded-lg p-1.5 font-bold text-xs cursor-pointer text-[#1c1b1c]"
                   >
                     <option value="Complaint">Complaint</option>
                     <option value="Issue">Issue</option>
@@ -186,11 +183,11 @@ export default function AdminReportDetailModal({
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-emerald-900 uppercase">Urgency:</label>
+                  <label className="text-[10px] font-bold text-[#47464b] uppercase">Urgency:</label>
                   <select
                     value={['Low', 'Medium', 'High', 'Critical'].find(u => u.toLowerCase() === (report.urgency || report.priority || '').toLowerCase()) || 'Medium'}
                     onChange={(e) => onUpdateStatus(report.id, report.status, `Changed urgency to ${e.target.value}`)}
-                    className="bg-white border border-emerald-300 rounded-lg p-1.5 font-bold text-xs cursor-pointer"
+                    className="bg-white border border-[#c8c5cb] rounded-lg p-1.5 font-bold text-xs cursor-pointer text-[#1c1b1c]"
                   >
                     <option value="Low">Low</option>
                     <option value="Medium">Medium</option>
@@ -201,8 +198,8 @@ export default function AdminReportDetailModal({
               </div>
 
               {report.ai_classification && (
-                <div className="text-[11px] text-emerald-900 mt-1 bg-white/90 p-2.5 rounded border border-emerald-200 flex flex-col gap-1">
-                  <div><strong>AI Summary:</strong> {report.ai_classification.summary || report.title}</div>
+                <div className="text-[11px] text-[#1c1b1c] mt-1 bg-white p-2.5 rounded border border-[#e5e2e1] flex flex-col gap-1">
+                  <div><strong>Summary:</strong> {report.ai_classification.summary || report.title}</div>
                   <div><strong>Main Problem:</strong> {report.ai_classification.problem || report.description}</div>
                 </div>
               )}

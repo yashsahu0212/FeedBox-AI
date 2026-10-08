@@ -45,54 +45,63 @@ export default function Header({ currentPath, navigateTo, activeTicketsCount, au
 
           {/* Desktop Navigation */}
           <nav className="hidden sm:flex items-center gap-5">
-            <button
-              onClick={() => handleNav('student-home')}
-              className={`transition-colors font-body-sm text-sm cursor-pointer ${
-                currentPath === 'student-home'
-                  ? 'text-[#1c1b1c] font-medium border-b-2 border-[#1b1b1e] pb-0.5'
-                  : 'text-[#47464b] hover:text-[#1c1b1c]'
-              }`}
-            >
-              Home
-            </button>
-            <button
-              onClick={() => handleNav('my-reports')}
-              className={`flex items-center gap-1.5 transition-colors font-body-sm text-sm cursor-pointer ${
-                currentPath === 'my-reports'
-                  ? 'text-[#1c1b1c] font-medium border-b-2 border-[#1b1b1e] pb-0.5'
-                  : 'text-[#47464b] hover:text-[#1c1b1c]'
-              }`}
-            >
-              <span>My Reports</span>
-              {activeTicketsCount > 0 && (
-                <span className="px-1.5 py-0.2 rounded-full bg-[#f1eded] text-[#47464b] text-[10px] font-semibold border border-[#c8c5cb]">
-                  {activeTicketsCount}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => handleNav('admin-portal')}
-              className={`flex items-center gap-1 transition-colors font-body-sm text-sm px-2.5 py-0.5 rounded-full cursor-pointer ${
-                currentPath === 'admin-portal'
-                  ? 'bg-[#1b1b1e] text-white font-medium'
-                  : 'bg-[#f7f3f2] text-[#39618c] font-semibold hover:bg-[#e5e2e1] border border-[#a2cafb]'
-              }`}
-            >
-              <span className="material-symbols-outlined text-sm">shield_person</span>
-              <span>Admin Portal</span>
-            </button>
+            {isStudent && (
+              <>
+                <button
+                  onClick={() => handleNav('student-home')}
+                  className={`transition-colors font-body-sm text-sm cursor-pointer ${
+                    currentPath === 'student-home'
+                      ? 'text-[#1c1b1c] font-medium border-b-2 border-[#1b1b1e] pb-0.5'
+                      : 'text-[#47464b] hover:text-[#1c1b1c]'
+                  }`}
+                >
+                  Home
+                </button>
+                <button
+                  onClick={() => handleNav('my-reports')}
+                  className={`flex items-center gap-1.5 transition-colors font-body-sm text-sm cursor-pointer ${
+                    currentPath === 'my-reports'
+                      ? 'text-[#1c1b1c] font-medium border-b-2 border-[#1b1b1e] pb-0.5'
+                      : 'text-[#47464b] hover:text-[#1c1b1c]'
+                  }`}
+                >
+                  <span>My Reports</span>
+                  {activeTicketsCount > 0 && (
+                    <span className="px-1.5 py-0.2 rounded-full bg-[#f1eded] text-[#47464b] text-[10px] font-semibold border border-[#c8c5cb]">
+                      {activeTicketsCount}
+                    </span>
+                  )}
+                </button>
+              </>
+            )}
+
+            {isAdmin && (
+              <button
+                onClick={() => handleNav('admin-portal')}
+                className={`flex items-center gap-1.5 transition-colors font-body-sm text-sm px-3 py-1 rounded-full cursor-pointer ${
+                  currentPath === 'admin-portal'
+                    ? 'bg-[#1b1b1e] text-white font-medium'
+                    : 'bg-[#f7f3f2] text-[#39618c] font-semibold hover:bg-[#e5e2e1] border border-[#a2cafb]'
+                }`}
+              >
+                <span className="material-symbols-outlined text-sm">shield_person</span>
+                <span>Department Admin Portal</span>
+              </button>
+            )}
           </nav>
         </div>
 
         {/* Right section: Action button & Profile & Mobile Toggle */}
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => handleNav('report-a-problem')}
-            className="inline-flex items-center justify-center h-8 px-3 font-label-md text-xs sm:text-sm rounded-md border border-[#c8c5cb] bg-white text-[#1c1b1c] hover:bg-[#f7f3f2] hover:text-[#1c1b1c] active:scale-[0.98] transition-all shadow-2xs cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[16px] mr-1 hidden xs:inline">add</span>
-            <span>Report a Problem</span>
-          </button>
+          {isStudent && (
+            <button
+              onClick={() => handleNav('report-a-problem')}
+              className="inline-flex items-center justify-center h-8 px-3 font-label-md text-xs sm:text-sm rounded-md border border-[#c8c5cb] bg-white text-[#1c1b1c] hover:bg-[#f7f3f2] hover:text-[#1c1b1c] active:scale-[0.98] transition-all shadow-2xs cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px] mr-1 hidden xs:inline">add</span>
+              <span>Report a Problem</span>
+            </button>
+          )}
 
           {/* User Profile Menu Dropdown */}
           <div className="relative pl-1" ref={dropdownRef}>
@@ -154,21 +163,23 @@ export default function Header({ currentPath, navigateTo, activeTicketsCount, au
                 </div>
 
                 <div className="flex flex-col gap-1 text-xs">
-                  <button
-                    onClick={() => handleNav('student-home')}
-                    className="w-full px-3 py-2 rounded-xl text-[#1c1b1c] hover:bg-[#f7f3f2] text-left flex items-center gap-2 cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-base">home</span>
-                    <span>Student Dashboard</span>
-                  </button>
-
-                  <button
-                    onClick={() => handleNav('admin-portal')}
-                    className="w-full px-3 py-2 rounded-xl text-[#1c1b1c] hover:bg-[#f7f3f2] text-left flex items-center gap-2 cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-base">shield_person</span>
-                    <span>Admin Staff Desk</span>
-                  </button>
+                  {isStudent ? (
+                    <button
+                      onClick={() => handleNav('student-home')}
+                      className="w-full px-3 py-2 rounded-xl text-[#1c1b1c] hover:bg-[#f7f3f2] text-left flex items-center gap-2 cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-base">home</span>
+                      <span>Student Dashboard</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleNav('admin-portal')}
+                      className="w-full px-3 py-2 rounded-xl text-[#1c1b1c] hover:bg-[#f7f3f2] text-left flex items-center gap-2 cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-base">shield_person</span>
+                      <span>Admin Staff Desk</span>
+                    </button>
+                  )}
 
                   <div className="my-1 border-t border-[#e5e2e1]"></div>
 
@@ -216,62 +227,68 @@ export default function Header({ currentPath, navigateTo, activeTicketsCount, au
             </button>
           </div>
 
-          <button
-            onClick={() => handleNav('student-home')}
-            className={`w-full text-left px-3 py-2 rounded-md font-medium text-sm flex items-center justify-between ${
-              currentPath === 'student-home'
-                ? 'bg-[#f1eded] text-[#1c1b1c]'
-                : 'text-[#47464b] hover:bg-[#f7f3f2]'
-            }`}
-          >
-            <span className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-lg">home</span>
-              Home
-            </span>
-          </button>
-          
-          <button
-            onClick={() => handleNav('my-reports')}
-            className={`w-full text-left px-3 py-2 rounded-md font-medium text-sm flex items-center justify-between ${
-              currentPath === 'my-reports'
-                ? 'bg-[#f1eded] text-[#1c1b1c]'
-                : 'text-[#47464b] hover:bg-[#f7f3f2]'
-            }`}
-          >
-            <span className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-lg">assignment</span>
-              My Reports
-            </span>
-            {activeTicketsCount > 0 && (
-              <span className="px-2 py-0.5 rounded-full bg-[#1b1b1e] text-white text-xs font-semibold">
-                {activeTicketsCount}
-              </span>
-            )}
-          </button>
+          {isStudent && (
+            <>
+              <button
+                onClick={() => handleNav('student-home')}
+                className={`w-full text-left px-3 py-2 rounded-md font-medium text-sm flex items-center justify-between ${
+                  currentPath === 'student-home'
+                    ? 'bg-[#f1eded] text-[#1c1b1c]'
+                    : 'text-[#47464b] hover:bg-[#f7f3f2]'
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-lg">home</span>
+                  Home
+                </span>
+              </button>
+              
+              <button
+                onClick={() => handleNav('my-reports')}
+                className={`w-full text-left px-3 py-2 rounded-md font-medium text-sm flex items-center justify-between ${
+                  currentPath === 'my-reports'
+                    ? 'bg-[#f1eded] text-[#1c1b1c]'
+                    : 'text-[#47464b] hover:bg-[#f7f3f2]'
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-lg">assignment</span>
+                  My Reports
+                </span>
+                {activeTicketsCount > 0 && (
+                  <span className="px-2 py-0.5 rounded-full bg-[#1b1b1e] text-white text-xs font-semibold">
+                    {activeTicketsCount}
+                  </span>
+                )}
+              </button>
 
-          <button
-            onClick={() => handleNav('report-a-problem')}
-            className={`w-full text-left px-3 py-2 rounded-md font-medium text-sm flex items-center gap-2 ${
-              currentPath === 'report-a-problem'
-                ? 'bg-[#1b1b1e] text-white'
-                : 'bg-[#f7f3f2] text-[#1c1b1c] border border-[#c8c5cb]'
-            }`}
-          >
-            <span className="material-symbols-outlined text-lg">add_circle</span>
-            Report New Problem
-          </button>
+              <button
+                onClick={() => handleNav('report-a-problem')}
+                className={`w-full text-left px-3 py-2 rounded-md font-medium text-sm flex items-center gap-2 ${
+                  currentPath === 'report-a-problem'
+                    ? 'bg-[#1b1b1e] text-white'
+                    : 'bg-[#f7f3f2] text-[#1c1b1c] border border-[#c8c5cb]'
+                }`}
+              >
+                <span className="material-symbols-outlined text-lg">add_circle</span>
+                Report New Problem
+              </button>
+            </>
+          )}
 
-          <button
-            onClick={() => handleNav('admin-portal')}
-            className={`w-full text-left px-3 py-2 rounded-md font-semibold text-sm flex items-center gap-2 ${
-              currentPath === 'admin-portal'
-                ? 'bg-[#1b1b1e] text-white'
-                : 'bg-[#d1e4ff] text-[#001d36] border border-[#a2cafb]'
-            }`}
-          >
-            <span className="material-symbols-outlined text-lg">shield_person</span>
-            Department Admin Portal
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => handleNav('admin-portal')}
+              className={`w-full text-left px-3 py-2 rounded-md font-semibold text-sm flex items-center gap-2 ${
+                currentPath === 'admin-portal'
+                  ? 'bg-[#1b1b1e] text-white'
+                  : 'bg-[#d1e4ff] text-[#001d36] border border-[#a2cafb]'
+              }`}
+            >
+              <span className="material-symbols-outlined text-lg">shield_person</span>
+              Department Admin Portal
+            </button>
+          )}
         </div>
       )}
     </header>
