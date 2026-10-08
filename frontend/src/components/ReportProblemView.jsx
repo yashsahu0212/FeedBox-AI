@@ -45,32 +45,26 @@ export default function ReportProblemView({ onSubmitReport, nearbyActivity = [] 
     setIsAnalyzing(true);
     setAiResult(null);
 
-    // Combine user text & optional location string for complete AI classification
     const fullText = locationText.trim() ? `${description.trim()} in ${locationText.trim()}` : description.trim();
 
     try {
-      // 1. Run AI Classification Engine (with n8n Webhook support & fallback)
+      // 1. Run LLM AI Agent Classifier
       const classification = await classifyComplaintAI(fullText);
       setAiResult(classification);
 
-      // Prepare submission object
-      const primaryIssue = classification.multiple_issues ? classification.issues[0] : classification;
-      
+      const locDisplay = typeof classification.location === 'string'
+        ? classification.location
+        : (classification.location?.hostel_block || locationText.trim() || null);
+
       const newTicket = {
-        title: primaryIssue.issue_summary || description.slice(0, 55).trim(),
+        title: classification.summary || description.slice(0, 55).trim(),
         description: description.trim(),
-        location: classification.location
-          ? [
-              classification.location.hostel_block,
-              classification.location.floor ? `${classification.location.floor} Floor` : null,
-              classification.location.wing ? `Wing ${classification.location.wing}` : null,
-              classification.location.room ? `Room ${classification.location.room}` : null,
-              classification.location.additional_location
-            ].filter(Boolean).join(' • ')
-          : (locationText.trim() || 'Unspecified'),
-        category: primaryIssue.category || category,
-        department: primaryIssue.department || 'Hostel Committee',
-        priority: primaryIssue.priority || 'medium',
+        location: locDisplay || 'Campus Main',
+        category: classification.category || 'Issue',
+        urgency: classification.urgency || 'Medium',
+        department: classification.department || 'Administration',
+        problem: classification.problem || description.trim(),
+        suggested_action: classification.suggested_action || null,
         attachedPhoto: attachedImage,
         aiClassification: classification
       };
@@ -296,9 +290,39 @@ export default function ReportProblemView({ onSubmitReport, nearbyActivity = [] 
               </div>
             )}
 
-            {/* Structured Classification Grid (Section 16 Format) */}
+            {/* Structured Classification Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-[#f7f3f2] p-4 rounded-xl border border-[#e5e2e1]">
               
+              {/* Category */}
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] uppercase font-mono tracking-wider text-[#77767b] font-bold">
+                  Category:
+                </span>
+                <span className="text-xs font-bold text-[#1c1b1c] bg-white px-2.5 py-1 rounded-lg border border-[#e5e2e1] self-start shadow-2xs">
+                  {aiResult.category}
+                </span>
+              </div>
+
+              {/* Urgency */}
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] uppercase font-mono tracking-wider text-[#77767b] font-bold">
+                  Urgency:
+                </span>
+                <div>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider inline-block ${
+                    aiResult.urgency === 'Critical'
+                      ? 'bg-red-100 text-red-700 border border-red-200'
+                      : aiResult.urgency === 'High'
+                      ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                      : aiResult.urgency === 'Medium'
+                      ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                      : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                  }`}>
+                    {aiResult.urgency}
+                  </span>
+                </div>
+              </div>
+
               {/* Department */}
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] uppercase font-mono tracking-wider text-[#77767b] font-bold">
@@ -306,39 +330,8 @@ export default function ReportProblemView({ onSubmitReport, nearbyActivity = [] 
                 </span>
                 <span className="text-xs font-bold text-[#1c1b1c] bg-white px-2.5 py-1 rounded-lg border border-[#e5e2e1] self-start shadow-2xs flex items-center gap-1">
                   <span className="material-symbols-outlined text-sm text-[#39618c]">domain</span>
-                  {aiResult.multiple_issues ? aiResult.issues[0].department : aiResult.department}
+                  {aiResult.department || 'Administration'}
                 </span>
-              </div>
-
-              {/* Category */}
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase font-mono tracking-wider text-[#77767b] font-bold">
-                  Category:
-                </span>
-                <span className="text-xs font-semibold text-[#1c1b1c] capitalize">
-                  {aiResult.multiple_issues ? aiResult.issues[0].category : aiResult.category}
-                  {(aiResult.subcategory || (aiResult.issues && aiResult.issues[0].subcategory)) && (
-                    <span className="text-[#77767b]"> → {aiResult.subcategory || aiResult.issues[0].subcategory}</span>
-                  )}
-                </span>
-              </div>
-
-              {/* Priority */}
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase font-mono tracking-wider text-[#77767b] font-bold">
-                  Priority:
-                </span>
-                <div>
-                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider inline-block ${
-                    (aiResult.priority || (aiResult.issues && aiResult.issues[0].priority)) === 'urgent'
-                      ? 'bg-red-100 text-red-700 border border-red-200'
-                      : (aiResult.priority || (aiResult.issues && aiResult.issues[0].priority)) === 'high'
-                      ? 'bg-amber-100 text-amber-800 border border-amber-200'
-                      : 'bg-blue-100 text-blue-800 border border-blue-200'
-                  }`}>
-                    {aiResult.priority || (aiResult.issues && aiResult.issues[0].priority)}
-                  </span>
-                </div>
               </div>
 
               {/* Location */}
@@ -347,31 +340,30 @@ export default function ReportProblemView({ onSubmitReport, nearbyActivity = [] 
                   Location:
                 </span>
                 <span className="text-xs font-medium text-[#1c1b1c]">
-                  {aiResult.location ? (
-                    [
-                      aiResult.location.hostel_block,
-                      aiResult.location.floor ? `Floor ${aiResult.location.floor}` : null,
-                      aiResult.location.wing ? `Wing ${aiResult.location.wing}` : null,
-                      aiResult.location.room ? `Room ${aiResult.location.room}` : null
-                    ].filter(Boolean).join(' → ')
-                  ) : (
-                    <span className="text-[#77767b] italic">Not mentioned</span>
-                  )}
+                  {aiResult.location || <span className="text-[#77767b] italic">null (Not specified)</span>}
                 </span>
               </div>
 
             </div>
 
-            {/* Issue Summary & Human-Readable Explanation */}
-            <div className="flex flex-col gap-2">
+            {/* Problem, Summary & Suggested Action */}
+            <div className="flex flex-col gap-3">
               <div>
-                <span className="text-[11px] font-bold text-[#47464b] block mb-0.5">AI Issue Summary:</span>
+                <span className="text-[11px] font-bold text-[#47464b] block mb-0.5">AI Summary & Problem:</span>
                 <p className="text-xs text-[#1c1b1c] font-medium bg-[#f7f3f2] p-3 rounded-xl border border-[#e5e2e1]">
-                  {aiResult.multiple_issues ? aiResult.issues[0].issue_summary : aiResult.issue_summary}
+                  <strong>Summary:</strong> {aiResult.summary}<br/>
+                  <strong>Main Problem:</strong> {aiResult.problem}
                 </p>
               </div>
 
-              {/* Explanation Note (Privacy-Compliant without CoT) */}
+              {aiResult.suggested_action && (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-950 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-base text-emerald-700 shrink-0">build</span>
+                  <span><strong>Suggested Action:</strong> {aiResult.suggested_action}</span>
+                </div>
+              )}
+
+              {/* Explanation Note */}
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-[#001d36] flex items-center gap-2">
                 <span className="material-symbols-outlined text-base text-[#39618c] shrink-0">info</span>
                 <span>{aiResult.reason}</span>

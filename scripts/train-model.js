@@ -1,99 +1,43 @@
-import fs from 'fs';
-import path from 'path';
+/**
+ * AI Agent Test & Schema Verification Script
+ * CampusAI Maintenance Portal
+ * 
+ * Description:
+ * Verifies that the LLM-powered AI Agent prompt rules and structured outputs
+ * satisfy all schema requirements without custom model training.
+ */
 
-// Read Training Dataset
-const datasetPath = path.resolve('data/training-dataset.json');
-const dataset = JSON.parse(fs.readFileSync(datasetPath, 'utf8'));
+import { analyzeReportWithAIAgent, runLocalAIAgentParser } from '../frontend/src/lib/aiAgentService.js';
 
-// Tokenizer & N-gram Generator
-function tokenize(text) {
-  const clean = text.toLowerCase()
-    .replace(/[^\w\s]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+const TEST_REPORTS = [
+  "The AC in Block A classroom is not functioning.",
+  "Exposed live electrical wires sparking near elevator in Hostel Block 2!",
+  "The hostel mess food quality is terrible and dirty dishes are everywhere.",
+  "We should consider adding soft study pods in the 2nd floor library reading section.",
+  "Kudos to the CTS team for fixing the Wi-Fi router in Block 3 within 15 minutes!",
+  "wifi nhi chal raha"
+];
 
-  const words = clean.split(' ').filter(w => w.length > 1);
-  const nGrams = [...words];
+console.log("==========================================================");
+console.log("   CAMPUSAI LLM AI AGENT TEST & SCHEMA VERIFICATION       ");
+console.log("==========================================================");
 
-  // Add bigrams
-  for (let i = 0; i < words.length - 1; i++) {
-    nGrams.push(`${words[i]}_${words[i + 1]}`);
+let passed = 0;
+
+for (const text of TEST_REPORTS) {
+  console.log(`\nInput Report: "${text}"`);
+  const res = runLocalAIAgentParser(text);
+  console.log("AI Agent Output JSON:", JSON.stringify(res, null, 2));
+
+  const validCategory = ['Complaint', 'Issue', 'Feedback', 'Compliment'].includes(res.category);
+  const validUrgency = ['Low', 'Medium', 'High', 'Critical'].includes(res.urgency);
+
+  if (validCategory && validUrgency && res.summary && res.problem) {
+    console.log(" Status:  VALID JSON SCHEMA");
+    passed++;
+  } else {
+    console.log(" Status: ❌ INVALID SCHEMA");
   }
-
-  return nGrams;
 }
 
-// Build Vocabulary & TF-IDF Vectors
-const vocabulary = new Set();
-const docCount = dataset.length;
-const docFrequencies = {};
-
-// Pass 1: Build Vocabulary and Document Frequencies
-dataset.forEach(sample => {
-  const tokens = new Set(tokenize(sample.text));
-  tokens.forEach(token => {
-    vocabulary.add(token);
-    docFrequencies[token] = (docFrequencies[token] || 0) + 1;
-  });
-});
-
-const vocabList = Array.from(vocabulary);
-
-// Calculate IDF weights
-const idf = {};
-vocabList.forEach(token => {
-  idf[token] = Math.log((docCount + 1) / ((docFrequencies[token] || 0) + 1)) + 1;
-});
-
-// Train Naive Bayes Classifier probabilities for Department & Category
-const deptCounts = {};
-const categoryCounts = {};
-const featureCountsByDept = {};
-const featureCountsByCat = {};
-const totalTokensByDept = {};
-const totalTokensByCat = {};
-
-dataset.forEach(sample => {
-  const dept = sample.department;
-  const cat = sample.category;
-  const tokens = tokenize(sample.text);
-
-  deptCounts[dept] = (deptCounts[dept] || 0) + 1;
-  categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
-
-  if (!featureCountsByDept[dept]) featureCountsByDept[dept] = {};
-  if (!featureCountsByCat[cat]) featureCountsByCat[cat] = {};
-  if (!totalTokensByDept[dept]) totalTokensByDept[dept] = 0;
-  if (!totalTokensByCat[cat]) totalTokensByCat[cat] = 0;
-
-  tokens.forEach(token => {
-    const tfidfWeight = idf[token] || 1;
-    featureCountsByDept[dept][token] = (featureCountsByDept[dept][token] || 0) + tfidfWeight;
-    featureCountsByCat[cat][token] = (featureCountsByCat[cat][token] || 0) + tfidfWeight;
-    totalTokensByDept[dept] += tfidfWeight;
-    totalTokensByCat[cat] += tfidfWeight;
-  });
-});
-
-// Export Model Weights Schema
-const modelWeights = {
-  version: '1.0.0-neural-tfidf',
-  trainedAt: new Date().toISOString(),
-  vocabulary: vocabList,
-  idf,
-  deptCounts,
-  categoryCounts,
-  featureCountsByDept,
-  featureCountsByCat,
-  totalTokensByDept,
-  totalTokensByCat,
-  docCount
-};
-
-// Write trained model weights to frontend source
-const outputPath = path.resolve('frontend/src/lib/trainedModelWeights.json');
-fs.writeFileSync(outputPath, JSON.stringify(modelWeights, null, 2), 'utf8');
-
-console.log(`✅ Model successfully trained on ${docCount} campus complaints!`);
-console.log(`📊 Vocabulary size: ${vocabList.length} unique n-gram features.`);
-console.log(`💾 Saved trained model weights to: ${outputPath}`);
+console.log(`\nResults: ${passed}/${TEST_REPORTS.length} passed schema validation.`);

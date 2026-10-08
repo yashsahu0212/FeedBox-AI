@@ -1,87 +1,77 @@
-# n8n AI Complaint Classification & Routing Workflow
+# n8n LLM AI Maintenance Agent Workflow
 
-This directory contains the n8n workflow configuration for the **CampusAI Complaint, Feedback & Report Classification and Routing System**.
+This directory contains the n8n workflow configuration for the **CampusAI Maintenance Portal**.
 
 ## 🚀 Overview
 
-The workflow receives natural-language student complaints via Webhook, performs AI classification & location extraction using an LLM node, validates confidence score thresholds (`>= 0.70`), handles multi-issue splitting, and routes tickets to department queues (CTS, Hostel Committee, Security, Academic, Accounts, Mess, Transport, Administration).
+The project uses an **LLM-powered AI Agent** that uses prompt engineering, few-shot examples, structured outputs, and backend validation to automatically classify and prioritize maintenance reports submitted by students and staff.
 
 ---
 
 ## 🛠️ Architecture & Flow
 
 ```
-Student Complaint Form (Frontend)
+User Report (Frontend Form)
        ↓
-Backend API Adapter / Webhook Proxy
+Backend API Adapter (aiAgentService.js)
        ↓
-n8n Webhook Endpoint (/webhook/classify-complaint)
+n8n Webhook Endpoint (/webhook/classify-complaint) OR LLM API (OpenAI/Groq/Ollama)
        ↓
-Validate & Normalize Payload
+LLM System Prompt & Few-Shot Reasoning
        ↓
-AI LLM Structured Extraction Node (JSON format)
+Strict JSON Output Generation
        ↓
-Confidence Score Check (Threshold: >= 0.70)
-  ├── < 0.70  ➜ Route to "manual_review" Queue
-  └── >= 0.70 ➜ Multi-Issue Check
-                    ├── Multiple Issues ➜ Split Out Item List
-                    └── Single Issue    ➜ Department Router
-                                              ↓
-                                     Urgent Priority Check
-                                              ↓
-                                 Database Insert & Return Payload
+Backend JSON Schema Validation
+       ↓
+PostgreSQL / Supabase Storage & Admin Override
 ```
 
 ---
 
-## 📋 Webhook Payload Specification
+## 📋 Structured JSON Output Schema
 
-### Incoming Webhook Request (`POST /webhook/classify-complaint`)
-
-```json
-{
-  "complaint_id": "TICK-8842",
-  "user_id": "user-21cs042",
-  "text": "My door latch is broken and want to replace it as soon as possible in block 3 7th floor B 701",
-  "submitted_at": "2026-10-06T15:30:00.000Z"
-}
-```
-
-### Expected Structured Output Response
+When a report is analyzed, the AI Agent returns:
 
 ```json
 {
-  "original_text": "My door latch is broken and want to replace it as soon as possible in block 3 7th floor B 701",
-  "intent_type": "complaint",
-  "category": "carpenter",
-  "subcategory": "door_latch",
-  "department": "Hostel Committee",
-  "priority": "urgent",
-  "issue_summary": "Door latch is broken and needs replacement",
-  "requested_action": "Repair or replace door latch",
-  "location": {
-    "hostel_block": "Block 3",
-    "floor": "7",
-    "wing": "B",
-    "room": "B701",
-    "additional_location": null
-  },
-  "confidence": 0.97,
-  "routing_status": "auto_routed",
-  "reason": "Classified as carpenter (door_latch) issue and automatically routed to Hostel Committee."
+  "category": "Issue",
+  "urgency": "High",
+  "summary": "The AC in Block A classroom is not functioning.",
+  "location": "Block A, Room 204",
+  "department": "Maintenance",
+  "problem": "AC is not cooling",
+  "suggested_action": "Inspect and repair the AC unit"
 }
 ```
+
+### Core Classification Rules
+
+#### Categories (Exactly One):
+- **Complaint**: Expressing dissatisfaction or poor service quality.
+- **Issue**: Specific physical, electrical, plumbing, or IT malfunction/breakdown.
+- **Feedback**: Constructive recommendations or suggestions for improvement.
+- **Compliment**: Praise or appreciation for fast service and staff efforts.
+
+#### Urgency Levels (Exactly One):
+- **Critical**: Safety hazards, sparks, fire risk, severe water flooding, structural danger.
+- **High**: Significant impact on ongoing classes, exams, or major user groups.
+- **Medium**: Important maintenance issues without immediate safety danger.
+- **Low**: Minor cosmetic defects, non-urgent requests, or compliments.
 
 ---
 
-## ⚙️ How to Import into n8n
+## ⚙️ Environment Configuration
 
-1. Open your **n8n Instance** (Local or Cloud).
-2. Go to **Workflows** → Click **Import from File**.
-3. Select `n8n/complaint-classification-workflow.json`.
-4. Configure your AI Model credentials (e.g. OpenAI / Anthropic / Local LLM) inside the **AI LLM Classification Node**.
-5. Set environment variable in `frontend/.env`:
-   ```env
-   VITE_N8N_WEBHOOK_URL=https://your-n8n-instance.com/webhook/classify-complaint
-   ```
-6. If `VITE_N8N_WEBHOOK_URL` is omitted or unavailable, the application automatically uses the embedded deterministic AI Classification engine in `frontend/src/lib/aiClassifier.js`.
+Set the environment variables in `frontend/.env`:
+
+```env
+# Option 1: n8n Webhook Integration
+VITE_N8N_WEBHOOK_URL=https://your-n8n-instance.com/webhook/classify-complaint
+
+# Option 2: Direct LLM API Provider (OpenAI / Groq / Ollama / Gemini)
+VITE_LLM_PROVIDER=openai
+VITE_LLM_API_KEY=your-api-key-here
+VITE_LLM_MODEL=gpt-4o-mini
+```
+
+If neither API key nor n8n URL is set, the application uses the built-in deterministic **Local AI Agent Parser** to execute the system prompt rules offline and produce schema-compliant JSON.

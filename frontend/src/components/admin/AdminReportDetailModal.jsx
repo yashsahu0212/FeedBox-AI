@@ -161,45 +161,53 @@ export default function AdminReportDetailModal({
                   >
                     <option value="CTS">CTS (Technical)</option>
                     <option value="Hostel Committee">Hostel Committee</option>
+                    <option value="Maintenance">Maintenance</option>
                     <option value="Security">Security</option>
                     <option value="Academic">Academic</option>
                     <option value="Accounts">Accounts / Finance</option>
                     <option value="Mess">Mess Services</option>
                     <option value="Transport">Transport</option>
                     <option value="Administration">Administration</option>
-                    <option value="manual_review">Manual Review</option>
                   </select>
                 </div>
 
                 <div className="flex flex-col gap-1">
                   <label className="text-[10px] font-bold text-emerald-900 uppercase">Category:</label>
-                  <input
-                    type="text"
-                    defaultValue={report.category || 'carpenter'}
-                    onBlur={(e) => onUpdateStatus(report.id, report.status, `Updated category to ${e.target.value}`)}
-                    className="bg-white border border-emerald-300 rounded-lg p-1.5 font-semibold text-xs"
-                  />
+                  <select
+                    value={['Complaint', 'Issue', 'Feedback', 'Compliment'].find(c => c.toLowerCase() === (report.category || '').toLowerCase()) || 'Issue'}
+                    onChange={(e) => onUpdateStatus(report.id, report.status, `Updated category to ${e.target.value}`)}
+                    className="bg-white border border-emerald-300 rounded-lg p-1.5 font-bold text-xs cursor-pointer"
+                  >
+                    <option value="Complaint">Complaint</option>
+                    <option value="Issue">Issue</option>
+                    <option value="Feedback">Feedback</option>
+                    <option value="Compliment">Compliment</option>
+                  </select>
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-emerald-900 uppercase">Priority:</label>
+                  <label className="text-[10px] font-bold text-emerald-900 uppercase">Urgency:</label>
                   <select
-                    value={report.priority || report.urgency || 'medium'}
-                    onChange={(e) => onUpdateStatus(report.id, report.status, `Changed priority to ${e.target.value}`)}
-                    className="bg-white border border-emerald-300 rounded-lg p-1.5 font-bold text-xs cursor-pointer capitalize"
+                    value={['Low', 'Medium', 'High', 'Critical'].find(u => u.toLowerCase() === (report.urgency || report.priority || '').toLowerCase()) || 'Medium'}
+                    onChange={(e) => onUpdateStatus(report.id, report.status, `Changed urgency to ${e.target.value}`)}
+                    className="bg-white border border-emerald-300 rounded-lg p-1.5 font-bold text-xs cursor-pointer"
                   >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                    <option value="urgent">Urgent</option>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Critical">Critical</option>
                   </select>
                 </div>
               </div>
 
-              {report.ai_classification?.reason && (
-                <p className="text-[11px] text-emerald-900 italic mt-1 bg-white/80 p-2 rounded border border-emerald-200">
-                  AI Note: {report.ai_classification.reason}
-                </p>
+              {report.ai_classification && (
+                <div className="text-[11px] text-emerald-900 mt-1 bg-white/90 p-2.5 rounded border border-emerald-200 flex flex-col gap-1">
+                  <div><strong>AI Summary:</strong> {report.ai_classification.summary || report.title}</div>
+                  <div><strong>Main Problem:</strong> {report.ai_classification.problem || report.description}</div>
+                  {report.ai_classification.suggested_action && (
+                    <div><strong>Suggested Action:</strong> {report.ai_classification.suggested_action}</div>
+                  )}
+                </div>
               )}
             </div>
 

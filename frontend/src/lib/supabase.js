@@ -457,25 +457,42 @@ export async function getDepartmentReports(adminDepartmentId, isSuperAdmin = fal
 }
 
 export async function submitNewReport(reportData) {
-  // Classify department using AI rule engine
-  const assignedDept = classifyReportDepartment(reportData.title, reportData.description);
+  let aiAnalysis = reportData.aiClassification;
+  if (!aiAnalysis || !aiAnalysis.category) {
+    const { runLocalAIAgentParser } = await import('./aiAgentService.js');
+    aiAnalysis = runLocalAIAgentParser(`${reportData.title || ''} ${reportData.description || ''}`);
+  }
+
+  const deptName = reportData.department || aiAnalysis.department || 'Administration';
+  const assignedDept = DEPARTMENTS_LIST.find(d => d.name.toLowerCase() === deptName.toLowerCase()) ||
+                       DEPARTMENTS_LIST.find(d => d.code.toLowerCase() === deptName.toLowerCase()) ||
+                       DEPARTMENTS_LIST.find(d => d.code === 'MAINT') ||
+                       DEPARTMENTS_LIST[0];
+
+  const categoryEnum = ['Complaint', 'Issue', 'Feedback', 'Compliment'].find(c => c.toLowerCase() === (aiAnalysis.category || reportData.category || '').toLowerCase()) || 'Issue';
+  const urgencyEnum = ['Low', 'Medium', 'High', 'Critical'].find(u => u.toLowerCase() === (aiAnalysis.urgency || reportData.urgency || '').toLowerCase()) || 'Medium';
 
   const newReport = {
     id: `rep-${Math.random().toString(36).substr(2, 9)}`,
-    title: reportData.title,
-    description: reportData.description,
-    category: (reportData.category || 'issue').toLowerCase(),
-    urgency: reportData.urgency || (reportData.title.toLowerCase().includes('critical') ? 'critical' : 'medium'),
+    title: reportData.title || aiAnalysis.summary || 'Maintenance Report',
+    description: reportData.description || aiAnalysis.problem || '',
+    category: categoryEnum.toLowerCase(),
+    urgency: urgencyEnum.toLowerCase(),
     status: 'submitted',
     department_id: assignedDept.id,
     department_name: assignedDept.name,
-    location: reportData.location || 'Campus Main',
+    location: reportData.location || aiAnalysis.location || 'Campus Main',
     attachment_url: reportData.attachedPhoto || null,
     ai_classification: {
-      category: reportData.category || 'issue',
-      suggested_department: assignedDept.name,
-      confidence: 0.95,
-      urgency: 'medium'
+      category: categoryEnum,
+      urgency: urgencyEnum,
+      summary: aiAnalysis.summary || reportData.title,
+      location: aiAnalysis.location || reportData.location || null,
+      department: assignedDept.name,
+      problem: aiAnalysis.problem || reportData.description,
+      suggested_action: aiAnalysis.suggested_action || null,
+      confidence: aiAnalysis.confidence || 0.96,
+      ai_analysis_timestamp: aiAnalysis.ai_analysis_timestamp || new Date().toISOString()
     },
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -500,7 +517,7 @@ export async function submitNewReport(reportData) {
     changed_by_name: 'Student / User',
     old_status: 'none',
     new_status: 'submitted',
-    note: `Report submitted and classified to ${assignedDept.name}`,
+    note: `Report submitted and classified by AI Agent as [${categoryEnum} | ${urgencyEnum} Urgency] -> Routed to ${assignedDept.name}`,
     created_at: new Date().toISOString()
   });
 

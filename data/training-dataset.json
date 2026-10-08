@@ -1,4 +1,13 @@
 [
+  { "text": "water cooler on my floor is not working in block 5 4 floor", "department": "Hostel Committee", "category": "plumbing", "subcategory": "water_cooler", "intent": "complaint", "priority": "high" },
+  { "text": "water cooler is not working", "department": "Hostel Committee", "category": "plumbing", "subcategory": "water_cooler", "intent": "complaint", "priority": "high" },
+  { "text": "drinking water cooler is leaking water", "department": "Hostel Committee", "category": "plumbing", "subcategory": "water_cooler", "intent": "complaint", "priority": "high" },
+  { "text": "water filter RO is giving dirty water", "department": "Hostel Committee", "category": "plumbing", "subcategory": "water_cooler", "intent": "complaint", "priority": "high" },
+  { "text": "geyser is not working cold water coming", "department": "Hostel Committee", "category": "plumbing", "subcategory": "geyser", "intent": "complaint", "priority": "high" },
+  { "text": "hot water supply disruption in hostel block B", "department": "Hostel Committee", "category": "plumbing", "subcategory": "geyser", "intent": "complaint", "priority": "high" },
+  { "text": "lift elevator is stuck on 4th floor", "department": "Hostel Committee", "category": "maintenance", "subcategory": "lift", "intent": "complaint", "priority": "urgent" },
+  { "text": "AC air conditioner is not cooling in lab 3", "department": "Hostel Committee", "category": "electrical", "subcategory": "ac_repair", "intent": "complaint", "priority": "high" },
+
   { "text": "My wifi is not working", "department": "CTS", "category": "technical", "subcategory": "wifi", "intent": "complaint", "priority": "high" },
   { "text": "wifi nhi chal raha hai room me", "department": "CTS", "category": "technical", "subcategory": "wifi", "intent": "complaint", "priority": "high" },
   { "text": "wifi nhi chal raha", "department": "CTS", "category": "technical", "subcategory": "wifi", "intent": "complaint", "priority": "high" },

@@ -7,7 +7,7 @@
         "path": "classify-complaint",
         "options": {}
       },
-      "name": "Webhook - Submit Complaint",
+      "name": "Webhook - Submit Report",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
       "position": [100, 300]
@@ -21,8 +21,8 @@
               "value": "={{ $json.body.text }}"
             },
             {
-              "name": "complaint_id",
-              "value": "={{ $json.body.complaint_id }}"
+              "name": "report_id",
+              "value": "={{ $json.body.report_id || $json.body.complaint_id }}"
             },
             {
               "name": "user_id",
@@ -41,94 +41,13 @@
       "parameters": {
         "model": "gpt-4o-mini",
         "options": {
-          "systemMessage": "You are CampusAI Complaint Classification Engine. Read student complaints (English, Hinglish) and return strictly JSON containing: intent_type, category, subcategory, department (CTS, Hostel Committee, Security, Academic, Accounts, Mess, Transport, Administration), priority (low, medium, high, urgent), issue_summary, requested_action, location (hostel_block, floor, wing, room, additional_location), confidence (0.0 to 1.0), and multiple_issues flag."
+          "systemMessage": "You are CampusAI Maintenance Dispatch Agent. Analyze user maintenance reports and output strictly valid JSON matching schema:\n{\n  \"category\": \"Complaint\" | \"Issue\" | \"Feedback\" | \"Compliment\",\n  \"urgency\": \"Low\" | \"Medium\" | \"High\" | \"Critical\",\n  \"summary\": string,\n  \"location\": string | null,\n  \"department\": string | null,\n  \"problem\": string,\n  \"suggested_action\": string | null\n}\nRules:\n- Categories: Complaint (dissatisfaction/poor service), Issue (physical/technical breakdown), Feedback (constructive improvement ideas), Compliment (appreciation/praise).\n- Urgencies: Critical (fire/sparks/flooding/danger), High (classes/exams/major users affected), Medium (normal maintenance without safety danger), Low (minor/cosmetic/suggestions).\n- Anti-hallucination: If location is missing from report text, set location to null. Do not invent details."
         }
       },
-      "name": "AI LLM Classification Node",
+      "name": "AI LLM Dispatcher Agent Node",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1,
       "position": [520, 300]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "number": [
-            {
-              "value1": "={{ $json.confidence }}",
-              "operation": "largerEqual",
-              "value2": 0.70
-            }
-          ]
-        }
-      },
-      "name": "Confidence Check (>= 0.70)",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [740, 300]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "boolean": [
-            {
-              "value1": "={{ $json.multiple_issues }}",
-              "value2": true
-            }
-          ]
-        }
-      },
-      "name": "Multi-Issue Check",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [960, 240]
-    },
-    {
-      "parameters": {
-        "fieldToSplitOut": "issues",
-        "options": {}
-      },
-      "name": "Split Multi-Issues",
-      "type": "n8n-nodes-base.itemLists",
-      "typeVersion": 1,
-      "position": [1180, 160]
-    },
-    {
-      "parameters": {
-        "dataType": "string",
-        "value1": "={{ $json.department }}",
-        "rules": {
-          "rules": [
-            { "value2": "CTS", "output": 0 },
-            { "value2": "Hostel Committee", "output": 1 },
-            { "value2": "Security", "output": 2 },
-            { "value2": "Academic", "output": 3 },
-            { "value2": "Accounts", "output": 4 },
-            { "value2": "Mess", "output": 5 },
-            { "value2": "Transport", "output": 6 }
-          ]
-        },
-        "fallbackOutput": 7
-      },
-      "name": "Department Router",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 1,
-      "position": [1400, 300]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "string": [
-            {
-              "value1": "={{ $json.priority }}",
-              "value2": "urgent"
-            }
-          ]
-        }
-      },
-      "name": "Urgent Priority Check",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [1620, 300]
     },
     {
       "parameters": {
@@ -139,75 +58,18 @@
       "name": "Webhook Response",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1840, 300]
-    },
-    {
-      "parameters": {
-        "values": {
-          "string": [
-            {
-              "name": "routing_status",
-              "value": "manual_review"
-            },
-            {
-              "name": "department",
-              "value": "manual_review"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "name": "Route to Manual Review",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 1,
-      "position": [960, 420]
+      "position": [740, 300]
     }
   ],
   "connections": {
-    "Webhook - Submit Complaint": {
+    "Webhook - Submit Report": {
       "main": [[{ "node": "Validate & Normalize Input", "type": "main", "index": 0 }]]
     },
     "Validate & Normalize Input": {
-      "main": [[{ "node": "AI LLM Classification Node", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "AI LLM Dispatcher Agent Node", "type": "main", "index": 0 }]]
     },
-    "AI LLM Classification Node": {
-      "main": [[{ "node": "Confidence Check (>= 0.70)", "type": "main", "index": 0 }]]
-    },
-    "Confidence Check (>= 0.70)": {
-      "main": [
-        [{ "node": "Multi-Issue Check", "type": "main", "index": 0 }],
-        [{ "node": "Route to Manual Review", "type": "main", "index": 0 }]
-      ]
-    },
-    "Multi-Issue Check": {
-      "main": [
-        [{ "node": "Split Multi-Issues", "type": "main", "index": 0 }],
-        [{ "node": "Department Router", "type": "main", "index": 0 }]
-      ]
-    },
-    "Split Multi-Issues": {
-      "main": [[{ "node": "Department Router", "type": "main", "index": 0 }]]
-    },
-    "Department Router": {
-      "main": [
-        [{ "node": "Urgent Priority Check", "type": "main", "index": 0 }],
-        [{ "node": "Urgent Priority Check", "type": "main", "index": 0 }],
-        [{ "node": "Urgent Priority Check", "type": "main", "index": 0 }],
-        [{ "node": "Urgent Priority Check", "type": "main", "index": 0 }],
-        [{ "node": "Urgent Priority Check", "type": "main", "index": 0 }],
-        [{ "node": "Urgent Priority Check", "type": "main", "index": 0 }],
-        [{ "node": "Urgent Priority Check", "type": "main", "index": 0 }],
-        [{ "node": "Urgent Priority Check", "type": "main", "index": 0 }]
-      ]
-    },
-    "Route to Manual Review": {
+    "AI LLM Dispatcher Agent Node": {
       "main": [[{ "node": "Webhook Response", "type": "main", "index": 0 }]]
-    },
-    "Urgent Priority Check": {
-      "main": [
-        [{ "node": "Webhook Response", "type": "main", "index": 0 }],
-        [{ "node": "Webhook Response", "type": "main", "index": 0 }]
-      ]
     }
   },
   "settings": {}
