@@ -70,9 +70,9 @@ export function validateAndNormalizeAIResponse(rawObj, originalText = '') {
     }
   }
 
-  // Summary
+  // Summary — trust LLM output, only fallback if completely empty
   let summary = (rawObj && rawObj.summary && String(rawObj.summary).trim()) || '';
-  if (!summary || summary === originalText.trim()) {
+  if (!summary) {
     summary = category === 'Compliment' 
       ? `Student expressed appreciation regarding campus initiative.`
       : `Report submitted regarding ${department} facility request.`;
@@ -83,7 +83,7 @@ export function validateAndNormalizeAIResponse(rawObj, originalText = '') {
   if (rawObj && rawObj.location) {
     if (typeof rawObj.location === 'string') {
       const locStr = rawObj.location.trim();
-      if (locStr && locStr.toLowerCase() !== 'null' && locStr.toLowerCase() !== 'undefined' && locStr.toLowerCase() !== 'unspecified' && locStr.toLowerCase() !== 'none') {
+      if (locStr && locStr.toLowerCase() !== 'null' && locStr.toLowerCase() !== 'undefined' && locStr.toLowerCase() !== 'unspecified' && locStr.toLowerCase() !== 'none' && locStr.toLowerCase() !== 'university campus' && locStr.toLowerCase() !== 'campus') {
         location = locStr;
       }
     } else if (typeof rawObj.location === 'object' && rawObj.location !== null) {
@@ -98,9 +98,9 @@ export function validateAndNormalizeAIResponse(rawObj, originalText = '') {
     }
   }
 
-  // Problem description
+  // Problem — trust LLM output, only fallback if completely empty
   let problem = (rawObj && rawObj.problem && String(rawObj.problem).trim()) || '';
-  if (!problem || problem === originalText.trim()) {
+  if (!problem) {
     problem = category === 'Compliment' ? 'Campus Service & Initiative Praise' : `${department} Facility Concern`;
   }
 

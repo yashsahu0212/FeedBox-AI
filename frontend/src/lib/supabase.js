@@ -459,8 +459,8 @@ export async function getDepartmentReports(adminDepartmentId, isSuperAdmin = fal
 export async function submitNewReport(reportData) {
   let aiAnalysis = reportData.aiClassification;
   if (!aiAnalysis || !aiAnalysis.category) {
-    const { runLocalAIAgentParser } = await import('./aiAgentService.js');
-    aiAnalysis = runLocalAIAgentParser(`${reportData.title || ''} ${reportData.description || ''}`);
+    const { analyzeReportWithAIAgent } = await import('./aiAgentService.js');
+    aiAnalysis = await analyzeReportWithAIAgent(`${reportData.title || ''} ${reportData.description || ''}`);
   }
 
   const deptName = reportData.department || aiAnalysis.department || 'Administration';
