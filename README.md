@@ -1,6 +1,6 @@
 # feedBox AI — Intelligent Campus Maintenance & Operations Portal 🚀
 
-![feedBox AI Favicon](frontend/public/favicon.svg)
+
 
 **feedBox AI** is an AI-powered college campus issue reporting, feedback classification, and automated department routing platform. It connects students and campus facility administration into a unified, friction-free maintenance ecosystem.
 
