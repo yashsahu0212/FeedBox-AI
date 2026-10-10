@@ -1,6 +1,6 @@
 # n8n LLM AI Maintenance Agent Workflow
 
-This directory contains the n8n workflow configuration for the **CampusAI Maintenance Portal**.
+This directory contains the n8n workflow configuration for the **feedBox AI Maintenance Portal**.
 
 ## 🚀 Overview
 

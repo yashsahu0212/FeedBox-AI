@@ -1,5 +1,5 @@
 {
-  "name": "CampusAI Complaint Classification & Department Routing",
+  "name": "feedBox AI Complaint Classification & Department Routing",
   "nodes": [
     {
       "parameters": {
@@ -41,7 +41,7 @@
       "parameters": {
         "model": "gpt-4o-mini",
         "options": {
-          "systemMessage": "You are CampusAI Maintenance Dispatch Agent. Analyze user maintenance reports and output strictly valid JSON matching schema:\n{\n  \"category\": \"Complaint\" | \"Issue\" | \"Feedback\" | \"Compliment\",\n  \"urgency\": \"Low\" | \"Medium\" | \"High\" | \"Critical\",\n  \"summary\": string,\n  \"location\": string | null,\n  \"department\": string | null,\n  \"problem\": string,\n  \"suggested_action\": string | null\n}\nRules:\n- Categories: Complaint (dissatisfaction/poor service), Issue (physical/technical breakdown), Feedback (constructive improvement ideas), Compliment (appreciation/praise).\n- Urgencies: Critical (fire/sparks/flooding/danger), High (classes/exams/major users affected), Medium (normal maintenance without safety danger), Low (minor/cosmetic/suggestions).\n- Anti-hallucination: If location is missing from report text, set location to null. Do not invent details."
+          "systemMessage": "You are feedBox AI Maintenance Dispatch Agent. Analyze user maintenance reports and output strictly valid JSON matching schema:\n{\n  \"category\": \"Complaint\" | \"Issue\" | \"Feedback\" | \"Compliment\",\n  \"urgency\": \"Low\" | \"Medium\" | \"High\" | \"Critical\",\n  \"summary\": string,\n  \"location\": string | null,\n  \"department\": string | null,\n  \"problem\": string,\n  \"suggested_action\": string | null\n}\nRules:\n- Categories: Complaint (dissatisfaction/poor service), Issue (physical/technical breakdown), Feedback (constructive improvement ideas), Compliment (appreciation/praise).\n- Urgencies: Critical (fire/sparks/flooding/danger), High (classes/exams/major users affected), Medium (normal maintenance without safety danger), Low (minor/cosmetic/suggestions).\n- Anti-hallucination: If location is missing from report text, set location to null. Do not invent details."
         }
       },
       "name": "AI LLM Dispatcher Agent Node",

@@ -94,15 +94,15 @@ export default function LoginPage({ onLoginSuccess }) {
         {/* Left Column: Branding & Portal Benefits */}
         <div className="lg:col-span-5 flex flex-col gap-6 text-left">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-[#1b1b1e] text-white flex items-center justify-center font-bold text-xl tracking-tighter shadow-md">
-              CAI
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#4f46e5] to-[#7c3aed] text-white flex items-center justify-center font-extrabold text-lg tracking-tighter shadow-md">
+              FB
             </div>
             <div>
-              <span className="font-code-sm text-xs text-[#39618c] font-bold uppercase tracking-wider block">
-                Campus AI Maintenance Portal
+              <span className="font-code-sm text-xs text-[#4f46e5] font-bold uppercase tracking-wider block">
+                feedBox AI Maintenance Portal
               </span>
               <h1 className="font-headline-sm font-bold text-2xl text-[#1c1b1c] tracking-tight">
-                CampusAI Portal
+                feedBox <span className="text-[#4f46e5]">AI</span> Portal
               </h1>
             </div>
           </div>

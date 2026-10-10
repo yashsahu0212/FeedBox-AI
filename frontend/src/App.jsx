@@ -30,7 +30,7 @@ function AppContent() {
   // Persistent Tickets State
   const [tickets, setTickets] = useState(() => {
     try {
-      const saved = localStorage.getItem('campusai_tickets');
+      const saved = localStorage.getItem('feedboxai_tickets') || localStorage.getItem('campusai_tickets');
       return saved ? JSON.parse(saved) : initialTickets;
     } catch {
       return initialTickets;
@@ -40,7 +40,7 @@ function AppContent() {
   // Save to localStorage when tickets state updates
   useEffect(() => {
     try {
-      localStorage.setItem('campusai_tickets', JSON.stringify(tickets));
+      localStorage.setItem('feedboxai_tickets', JSON.stringify(tickets));
     } catch (err) {
       console.error('Failed to save to localStorage', err);
     }

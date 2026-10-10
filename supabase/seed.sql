@@ -1,5 +1,5 @@
 -- ========================================================
--- CampusAI Maintenance Portal — Supabase Seed Data
+-- feedBox AI Maintenance Portal — Supabase Seed Data
 -- File: supabase/seed.sql
 -- ========================================================
 

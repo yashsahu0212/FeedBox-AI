@@ -35,11 +35,11 @@ export default function Header({ currentPath, navigateTo, activeTicketsCount, au
             onClick={() => handleNav('student-home')}
             className="flex items-center gap-2 text-left text-[#1c1b1c] hover:opacity-80 transition-opacity focus:outline-none cursor-pointer"
           >
-            <div className="w-7 h-7 rounded-lg bg-[#1b1b1e] text-white flex items-center justify-center font-bold text-sm tracking-tighter shadow-xs">
-              CAI
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#4f46e5] to-[#7c3aed] text-white flex items-center justify-center font-extrabold text-xs tracking-tighter shadow-xs">
+              FB
             </div>
             <span className="font-headline-sm font-semibold tracking-tight text-[#1c1b1c] text-base">
-              CampusAI
+              feedBox <span className="text-[#4f46e5] font-bold">AI</span>
             </span>
           </button>
 

@@ -1,6 +1,6 @@
 /**
  * AI Agent Test & Schema Verification Script
- * CampusAI Maintenance Portal
+ * FeedBox AI Maintenance Portal
  * 
  * Description:
  * Verifies that the LLM-powered AI Agent prompt rules and structured outputs
@@ -19,7 +19,7 @@ const TEST_REPORTS = [
 ];
 
 console.log("==========================================================");
-console.log("   CAMPUSAI LLM AI AGENT TEST & SCHEMA VERIFICATION       ");
+console.log("   FEEDBOX AI LLM AI AGENT TEST & SCHEMA VERIFICATION     ");
 console.log("==========================================================");
 
 let passed = 0;

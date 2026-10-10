@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://demo-campusai.supabase.co';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://demo-feedboxai.supabase.co';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'demo-anon-key-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
 
 // Initialize Supabase Client
@@ -101,11 +101,11 @@ export function classifyReportDepartment(title = '', description = '') {
 // ----------------------------------------------------
 // LOCAL STORAGE & REAL-TIME BACKEND ADAPTER
 // ----------------------------------------------------
-const STORAGE_KEY_REPORTS = 'campusai_supabase_reports';
-const STORAGE_KEY_STATUS_HISTORY = 'campusai_supabase_history';
-const STORAGE_KEY_COMMENTS = 'campusai_supabase_comments';
-const STORAGE_KEY_SESSION = 'campusai_admin_session';
-const STORAGE_KEY_USER = 'campusai_current_user';
+const STORAGE_KEY_REPORTS = 'feedboxai_supabase_reports';
+const STORAGE_KEY_STATUS_HISTORY = 'feedboxai_supabase_history';
+const STORAGE_KEY_COMMENTS = 'feedboxai_supabase_comments';
+const STORAGE_KEY_SESSION = 'feedboxai_admin_session';
+const STORAGE_KEY_USER = 'feedboxai_current_user';
 
 // Initialize default seed state into LocalStorage if empty
 function initializeLocalStorageBackend() {

@@ -87,7 +87,7 @@ export const TEST_SUITE = [
 ];
 
 export function runClassificationTests() {
-  console.log('=== RUNNING CAMPUSAI LLM AI AGENT AUTOMATED TEST SUITE ===');
+  console.log('=== RUNNING FEEDBOX AI LLM AI AGENT AUTOMATED TEST SUITE ===');
   let passedCount = 0;
   let failedCount = 0;
   const results = [];

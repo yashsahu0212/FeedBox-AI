@@ -1,5 +1,5 @@
 -- ========================================================
--- CampusAI Maintenance Portal — Supabase PostgreSQL Schema
+-- feedBox AI Maintenance Portal — Supabase PostgreSQL Schema
 -- Migration File: 20261006_initial_schema.sql
 -- ========================================================
 

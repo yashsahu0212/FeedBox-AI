@@ -1,6 +1,6 @@
 /**
  * LLM AI Agent Classification & Dispatch Engine
- * CampusAI Maintenance Portal
+ * FeedBox AI Maintenance Portal
  */
 
 import { analyzeReportWithAIAgent, runLocalAIAgentParser, validateAndNormalizeAIResponse } from './aiAgentService.js';
