@@ -1,4 +1,4 @@
-# feedBox AI — Intelligent Campus Maintenance & Operations Portal 🚀
+# feedBox AI - Intelligent Campus Maintenance & Operations Portal 
 
 
 
@@ -6,18 +6,18 @@
 
 ---
 
-## ✨ Features
+##  Features
 
-- **🤖 Autonomous AI Classification & Dispatch**: Automatically analyzes user issue reports using LLM prompt engineering, few-shot reasoning, and fallback natural language parsers to classify intent (**Complaint**, **Issue**, **Feedback**, **Compliment**), extract exact physical locations, assign urgency levels (**Low**, **Medium**, **High**, **Critical**), and route to 1 of 9 campus departments.
-- **🎓 Dual-Role Dashboard & RLS Security**: 
+- ** Autonomous AI Classification & Dispatch**: Automatically analyzes user issue reports using LLM prompt engineering, few-shot reasoning, and fallback natural language parsers to classify intent (**Complaint**, **Issue**, **Feedback**, **Compliment**), extract exact physical locations, assign urgency levels (**Low**, **Medium**, **High**, **Critical**), and route to 1 of 9 campus departments.
+- ** Dual-Role Dashboard & RLS Security**: 
   - **Student Portal**: Submit complaints, attach photos, track real-time status timelines, and leave comments.
   - **Department Admin Desk**: Role-based access control with department-specific ticket queues (CTS, Maintenance, Hostel, Placement, Admin, Exams, Finance, Academic, Student Welfare).
-- **📊 Real-Time Status & History Log**: Audit logs for every status change, technician dispatch note, and resolution timestamp.
-- **⚡ n8n & LLM Webhook Integration**: Full workflow orchestration support via n8n automation or direct LLM APIs (OpenAI / Groq / Ollama / Gemini).
+- ** Real-Time Status & History Log**: Audit logs for every status change, technician dispatch note, and resolution timestamp.
+- ** n8n & LLM Webhook Integration**: Full workflow orchestration support via n8n automation or direct LLM APIs (OpenAI / Groq / Ollama / Gemini).
 
 ---
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
 - **Frontend**: React 19, Vite, TailwindCSS 4, Material Symbols & Google Fonts
 - **Backend / DB Adapter**: Supabase (PostgreSQL with RLS) & LocalStorage Offline Fallback State
@@ -26,7 +26,7 @@
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### 1. Installation
 ```bash
@@ -46,7 +46,7 @@ npm run test:ai
 
 ---
 
-## 📑 Project Structure
+##  Project Structure
 
 ```
 ├── frontend/
@@ -65,7 +65,7 @@ npm run test:ai
 
 ---
 
-## 🔒 Security & Anti-Hallucination
+##  Security & Anti-Hallucination
 
 - **Anti-Hallucination Guards**: If location is not explicitly mentioned in report text, the AI Agent outputs `null` rather than inventing false locations.
 - **Strict JSON Schema Validation**: Backend validates AI Agent JSON output before persisting to storage.
