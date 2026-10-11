@@ -142,7 +142,7 @@ export default function AdminLogin({ onLoginSuccess }) {
                       : 'border-[#e5e2e1] bg-[#f7f3f2] hover:bg-[#1b1b1e] hover:text-white'
                   }`}
                 >
-                  <span className="font-bold">{isAntiRagging ? '🛡️ Anti-Ragging' : admin.deptCode}</span>
+                  <span className="font-bold">{isAntiRagging ? 'Anti-Ragging' : admin.deptCode}</span>
                   <span className="text-[10px] opacity-80 truncate">{isAntiRagging ? 'Ragging & Fighting' : admin.name.split(' ')[0]}</span>
                 </button>
               );

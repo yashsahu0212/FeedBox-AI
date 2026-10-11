@@ -311,7 +311,7 @@ export default function AdminReportDetailModal({
                     onChange={(e) => onUpdateStatus(report.id, report.status, `Reassigned department to ${e.target.value}`)}
                     className="bg-white border border-[#c8c5cb] rounded-lg p-1.5 font-bold text-xs cursor-pointer text-[#1c1b1c]"
                   >
-                    <option value="Anti-Ragging">🛡️ Anti-Ragging</option>
+                    <option value="Anti-Ragging">Anti-Ragging</option>
                     <option value="CTS">CTS (Technical)</option>
                     <option value="Hostel">Hostel</option>
                     <option value="Hostel Committee">Hostel Committee</option>

@@ -305,7 +305,7 @@ export default function AdminReportsTable({ reports, onSelectReport }) {
                   className="hover:bg-[#f7f3f2]/60 cursor-pointer transition-colors"
                 >
                   <td className="py-3.5 px-4 font-mono font-semibold text-[#1c1b1c] whitespace-nowrap">
-                    {report.id.slice(0, 13)}
+                    {report.id}
                   </td>
                   <td className="py-3.5 px-4 max-w-xs sm:max-w-sm">
                     <div className="font-medium text-[#1c1b1c] line-clamp-1 hover:underline">

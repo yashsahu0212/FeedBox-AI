@@ -398,7 +398,7 @@ export default function LoginPage({ onLoginSuccess }) {
                       }`}
                     >
                       <span className="font-bold flex items-center gap-1">
-                        {isAntiRagging ? '🛡️ Anti-Ragging' : `${admin.deptCode} Desk`}
+                        {isAntiRagging ? 'Anti-Ragging' : `${admin.deptCode} Desk`}
                       </span>
                       <span className="text-[10px] opacity-80 truncate">
                         {isAntiRagging ? 'Ragging & Fighting' : admin.name.split(' ')[0]}

@@ -76,14 +76,14 @@ export default function AdminDashboard({ adminUser, onLogout, onSwitchAdmin }) {
           <div className={`w-11 h-11 rounded-xl text-white flex items-center justify-center font-bold text-base shadow-2xs shrink-0 ${
             isAntiRagging ? 'bg-red-700' : 'bg-[#1b1b1e]'
           }`}>
-            {isSuperAdmin ? 'SA' : (isAntiRagging ? '🛡️' : (adminUser.department?.code || 'DEPT'))}
+            {isSuperAdmin ? 'SA' : (isAntiRagging ? 'AR' : (adminUser.department?.code || 'DEPT'))}
           </div>
           <div>
             <div className="flex items-center gap-2">
               <span className={`font-label-sm text-xs uppercase tracking-wider font-bold ${
                 isAntiRagging ? 'text-red-700' : 'text-[#39618c]'
               }`}>
-                {isAntiRagging ? '🛡️ Anti-Ragging Desk' : `Logged in as ${adminUser.name}`}
+                {isAntiRagging ? 'Anti-Ragging Desk' : `Logged in as ${adminUser.name}`}
               </span>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             </div>
@@ -105,7 +105,7 @@ export default function AdminDashboard({ adminUser, onLogout, onSwitchAdmin }) {
             >
               {DEPARTMENTS_LIST.map((d) => (
                 <option key={d.code} value={d.code}>
-                  {(d.code === 'ANTI_RAGGING' || d.code === 'DISCIPLINE') ? '🛡️ ' : ''}{d.name} ({d.code})
+                  {d.name} ({d.code})
                 </option>
               ))}
             </select>

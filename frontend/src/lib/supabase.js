@@ -118,7 +118,7 @@ const STORAGE_KEY_USER = 'feedboxai_current_user';
 function initializeLocalStorageBackend() {
   const disciplineSeeds = [
     {
-      id: '22222222-2222-2222-2222-222222222210',
+      id: '22222222-222210',
       title: 'Seniors forcing 1st-year students into late-night ragging in Hostel Block C',
       description: 'A group of 3rd year seniors entered Room 214 around 11:30 PM, forcing junior freshers to do late-night physical chores and issuing threats if reported. Immediate proctor intervention requested.',
       category: 'complaint',
@@ -134,7 +134,7 @@ function initializeLocalStorageBackend() {
       resolved_at: null
     },
     {
-      id: '22222222-2222-2222-2222-222222222211',
+      id: '22222222-222211',
       title: 'Violent physical brawl and fighting near South Cafeteria exit',
       description: 'Violent physical altercation erupted between two student groups near the food court staircase. Security guards intervened, medical assistance called for minor injury.',
       category: 'complaint',
@@ -150,7 +150,7 @@ function initializeLocalStorageBackend() {
       resolved_at: null
     },
     {
-      id: '22222222-2222-2222-2222-222222222212',
+      id: '22222222-222212',
       title: 'Targeted cyberbullying, hallway intimidation and verbal abuse',
       description: 'Persistent intimidation, abusive slurs and cyber threats directed toward a 1st year student across college WhatsApp batch groups and the sports complex.',
       category: 'complaint',
@@ -166,7 +166,7 @@ function initializeLocalStorageBackend() {
       resolved_at: null
     },
     {
-      id: '22222222-2222-2222-2222-222222222213',
+      id: '22222222-222213',
       title: 'Resolved: Heated verbal confrontation defused in Academic Block B',
       description: 'Verbal dispute and aggressive shoving in Block B corridor. Proctorial board conducted mediation hearing with parents and signed behavioral bonds.',
       category: 'complaint',
@@ -187,7 +187,7 @@ function initializeLocalStorageBackend() {
     const seedReports = [
       ...disciplineSeeds,
       {
-        id: '22222222-2222-2222-2222-222222222201',
+        id: '22222222-222201',
         title: 'Wi-Fi signal drops continuously in Library 2nd Floor',
         description: 'Access point AP-L2-04 drops signal every 8-10 minutes on the second floor study hall. Signal registers 4 bars but IP leases fail systematically.',
         category: 'issue',
@@ -202,7 +202,7 @@ function initializeLocalStorageBackend() {
         resolved_at: null
       },
       {
-        id: '22222222-2222-2222-2222-222222222202',
+        id: '22222222-222202',
         title: 'Broken classroom fan in Room 302',
         description: 'Overhead oscillating fan squeaks intensely during lectures and smells of burnt wiring.',
         category: 'complaint',
@@ -217,7 +217,7 @@ function initializeLocalStorageBackend() {
         resolved_at: new Date(Date.now() - 86400000).toISOString()
       },
       {
-        id: '22222222-2222-2222-2222-222222222203',
+        id: '22222222-222203',
         title: 'Placement Portal registration submission error',
         description: 'Unable to upload updated resume PDF for upcoming TechCorp recruitment drive. Shows HTTP 500 error.',
         category: 'issue',
@@ -232,7 +232,7 @@ function initializeLocalStorageBackend() {
         resolved_at: null
       },
       {
-        id: '22222222-2222-2222-2222-222222222204',
+        id: '22222222-222204',
         title: 'Hot water supply disruption in Hostel Block B',
         description: 'Geyser circuit breaker trips every morning at 7:00 AM on 3rd floor west wing.',
         category: 'complaint',
@@ -247,7 +247,7 @@ function initializeLocalStorageBackend() {
         resolved_at: null
       },
       {
-        id: '22222222-2222-2222-2222-222222222205',
+        id: '22222222-222205',
         title: 'Library 2nd floor natural light seating suggestion',
         description: 'Reorienting the study carrels toward natural light along the north window bay would double usable space.',
         category: 'feedback',
@@ -280,7 +280,7 @@ function initializeLocalStorageBackend() {
     const seedHistory = [
       {
         id: 'h1',
-        report_id: '22222222-2222-2222-2222-222222222201',
+        report_id: '22222222-222201',
         changed_by_name: 'System AI',
         old_status: 'none',
         new_status: 'submitted',
@@ -289,7 +289,7 @@ function initializeLocalStorageBackend() {
       },
       {
         id: 'h2',
-        report_id: '22222222-2222-2222-2222-222222222201',
+        report_id: '22222222-222201',
         changed_by_name: 'Alex Vance (CTS)',
         old_status: 'submitted',
         new_status: 'processing',
@@ -298,7 +298,7 @@ function initializeLocalStorageBackend() {
       },
       {
         id: 'h3',
-        report_id: '22222222-2222-2222-2222-222222222202',
+        report_id: '22222222-222202',
         changed_by_name: 'Marcus Brody (Maintenance)',
         old_status: 'submitted',
         new_status: 'processing',
@@ -307,7 +307,7 @@ function initializeLocalStorageBackend() {
       },
       {
         id: 'h4',
-        report_id: '22222222-2222-2222-2222-222222222202',
+        report_id: '22222222-222202',
         changed_by_name: 'Marcus Brody (Maintenance)',
         old_status: 'processing',
         new_status: 'resolved',
@@ -322,7 +322,7 @@ function initializeLocalStorageBackend() {
     const seedComments = [
       {
         id: 'c1',
-        report_id: '22222222-2222-2222-2222-222222222201',
+        report_id: '22222222-222201',
         admin_name: 'Alex Vance',
         department_name: 'CTS',
         comment: 'Resetting access point router firmware and checking DHCP lease limits.',
@@ -330,7 +330,7 @@ function initializeLocalStorageBackend() {
       },
       {
         id: 'c2',
-        report_id: '22222222-2222-2222-2222-222222222203',
+        report_id: '22222222-222203',
         admin_name: 'Rohan Sharma',
         department_name: 'Placement Cell',
         comment: 'High priority flag raised for TechCorp drive applicants. IT team notified.',
@@ -570,10 +570,8 @@ export async function submitNewReport(reportData) {
             ? Object.values(aiAnalysis.location).filter(Boolean).join(', ')
             : 'Campus Main'));
 
-  // Valid UUID generator for PostgreSQL
-  const reportUuid = (typeof crypto !== 'undefined' && crypto.randomUUID)
-    ? crypto.randomUUID()
-    : '22222222-2222-2222-2222-' + Math.floor(100000000000 + Math.random() * 900000000000);
+  // Practical short ID generator
+  const reportUuid = '22222222-' + Math.floor(100000 + Math.random() * 900000);
 
   const newReport = {
     id: reportUuid,
