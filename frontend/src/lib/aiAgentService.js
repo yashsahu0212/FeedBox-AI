@@ -7,6 +7,7 @@ export function validateAndNormalizeAIResponse(rawObj, originalText = '') {
   const allowedCategories = ['Complaint', 'Issue', 'Feedback', 'Compliment'];
   const allowedUrgencies = ['Low', 'Medium', 'High', 'Critical'];
   const officialDepartments = [
+    'Anti-Ragging',
     'Anti-Ragging & Discipline Cell',
     'Hostel',
     'Maintenance',
@@ -56,10 +57,10 @@ export function validateAndNormalizeAIResponse(rawObj, originalText = '') {
     const deptStr = String(rawObj.department).trim();
     const matchedDept = officialDepartments.find(d => d.toLowerCase() === deptStr.toLowerCase());
     if (matchedDept) {
-      department = matchedDept;
+      department = matchedDept === 'Anti-Ragging & Discipline Cell' ? 'Anti-Ragging' : matchedDept;
     } else {
       const dLower = deptStr.toLowerCase();
-      if (dLower.includes('ragging') || dLower.includes('bully') || dLower.includes('fight') || dLower.includes('discipline')) department = 'Anti-Ragging & Discipline Cell';
+      if (dLower.includes('ragging') || dLower.includes('bully') || dLower.includes('fight') || dLower.includes('discipline')) department = 'Anti-Ragging';
       else if (dLower.includes('hostel') || dLower.includes('mess') || dLower.includes('dorm')) department = 'Hostel';
       else if (dLower.includes('maint') || dLower.includes('repair') || dLower.includes('electric') || dLower.includes('plumb')) department = 'Maintenance';
       else if (dLower.includes('cts') || dLower.includes('it') || dLower.includes('tech') || dLower.includes('net')) department = 'CTS';
@@ -167,7 +168,7 @@ export function runLocalAIAgentParser(text = '') {
       : (lowerText.includes('fight') || lowerText.includes('assault') || lowerText.includes('brawl')
           ? 'Physical Altercation & Campus Violence Clash'
           : 'Targeted Bullying & Verbal Abuse Incident');
-    department = 'Anti-Ragging & Discipline Cell';
+    department = 'Anti-Ragging';
   } else if (/\b(counseling|counselling|welfare|club|sport|fest|event|gym)\b/i.test(lowerText)) {
     problemType = 'Student Welfare, Clubs & Activity Coordination';
     department = 'Student Welfare';

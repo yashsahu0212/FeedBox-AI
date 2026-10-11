@@ -14,7 +14,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 
 // Initial Departments definition
 export const DEPARTMENTS_LIST = [
-  { id: '11111111-1111-1111-1111-111111111110', name: 'Anti-Ragging & Discipline Cell', code: 'DISCIPLINE', description: 'Zero-Tolerance Vigilance Desk for Ragging, Bullying, Physical Altercations, Harassment, and Disciplinary Misconduct' },
+  { id: '11111111-1111-1111-1111-111111111110', name: 'Anti-Ragging', code: 'ANTI_RAGGING', description: 'Anti-Ragging, Bullying & Fighting Cell for Campus Safety and Student Welfare' },
   { id: '11111111-1111-1111-1111-111111111101', name: 'CTS', code: 'CTS', description: 'Computer & Technology Services, Campus IT Infrastructure & Wi-Fi' },
   { id: '11111111-1111-1111-1111-111111111102', name: 'Administration', code: 'ADMIN', description: 'General Administrative Desk, Security, Transport, and Logistics' },
   { id: '11111111-1111-1111-1111-111111111103', name: 'Placement Cell', code: 'PLACEMENT', description: 'Career Services, Campus Recruitment Drives, and Corporate Liaison' },
@@ -28,8 +28,7 @@ export const DEPARTMENTS_LIST = [
 
 // Initial Admin Users for testing each department
 export const DEMO_ADMINS = [
-  { email: 'antiragging.admin@college.edu', name: 'Capt. Rajesh Sharma (Proctorial Board)', role: 'discipline_admin', deptCode: 'DISCIPLINE' },
-  { email: 'discipline.admin@college.edu', name: 'Dr. Meenakshi Sundaram (Anti-Ragging Squad)', role: 'discipline_admin', deptCode: 'DISCIPLINE' },
+  { email: 'antiragging.admin@college.edu', name: 'Capt. Rajesh Sharma', role: 'department_admin', deptCode: 'ANTI_RAGGING' },
   { email: 'cts.admin@college.edu', name: 'Alex Vance', role: 'department_admin', deptCode: 'CTS' },
   { email: 'admin.manager@college.edu', name: 'Sarah Jenkins', role: 'department_manager', deptCode: 'ADMIN' },
   { email: 'placement.admin@college.edu', name: 'Rohan Sharma', role: 'department_admin', deptCode: 'PLACEMENT' },
@@ -76,7 +75,7 @@ export function classifyReportDepartment(title = '', description = '') {
 
   // High-priority check: Anti-Ragging, Bullying, Fighting, Violence, Harassment, Hazing
   if (/ragging|rag\b|bully|bullying|fight|fighting|marpit|violence|harass|harassment|assault|beating|abuse|extortion|threat|intimidation|hazing|quarrel|physical clash/.test(text)) {
-    return DEPARTMENTS_LIST.find(d => d.code === 'DISCIPLINE');
+    return DEPARTMENTS_LIST.find(d => d.code === 'ANTI_RAGGING' || d.code === 'DISCIPLINE');
   }
 
   if (/wifi|wi-fi|internet|network|router|ip|mac|laptop|server|cloud|portal login|login issue|software|cyber|cts/.test(text)) {
@@ -125,10 +124,11 @@ function initializeLocalStorageBackend() {
       category: 'complaint',
       urgency: 'critical',
       status: 'processing',
-      department_id: '11111111-1111-1111-1111-111111111110', // Anti-Ragging & Discipline Cell
+      department_id: '11111111-1111-1111-1111-111111111110', // Anti-Ragging
+      department_name: 'Anti-Ragging',
       location: 'Hostel Block C, Floor 2, Room 214',
       attachment_url: null,
-      ai_classification: { category: 'complaint', suggested_department: 'Anti-Ragging & Discipline Cell', confidence: 0.99, urgency: 'critical', summary: 'Hostel Block C Late-Night Ragging Incident', problem: 'Ragging & Intimidation Violation' },
+      ai_classification: { category: 'complaint', suggested_department: 'Anti-Ragging', confidence: 0.99, urgency: 'critical', summary: 'Hostel Block C Late-Night Ragging Incident', problem: 'Ragging & Intimidation Violation' },
       created_at: new Date(Date.now() - 7200000).toISOString(),
       updated_at: new Date(Date.now() - 3600000).toISOString(),
       resolved_at: null
@@ -140,10 +140,11 @@ function initializeLocalStorageBackend() {
       category: 'complaint',
       urgency: 'critical',
       status: 'submitted',
-      department_id: '11111111-1111-1111-1111-111111111110', // Anti-Ragging & Discipline Cell
+      department_id: '11111111-1111-1111-1111-111111111110', // Anti-Ragging
+      department_name: 'Anti-Ragging',
       location: 'Campus Food Court & Cafeteria South Exit',
       attachment_url: null,
-      ai_classification: { category: 'complaint', suggested_department: 'Anti-Ragging & Discipline Cell', confidence: 0.98, urgency: 'critical', summary: 'Cafeteria Physical Brawl and Fighting Clash', problem: 'Physical Fighting & Campus Violence' },
+      ai_classification: { category: 'complaint', suggested_department: 'Anti-Ragging', confidence: 0.98, urgency: 'critical', summary: 'Cafeteria Physical Brawl and Fighting Clash', problem: 'Physical Fighting & Campus Violence' },
       created_at: new Date(Date.now() - 14400000).toISOString(),
       updated_at: new Date(Date.now() - 14400000).toISOString(),
       resolved_at: null
@@ -155,10 +156,11 @@ function initializeLocalStorageBackend() {
       category: 'complaint',
       urgency: 'high',
       status: 'processing',
-      department_id: '11111111-1111-1111-1111-111111111110', // Anti-Ragging & Discipline Cell
+      department_id: '11111111-1111-1111-1111-111111111110', // Anti-Ragging
+      department_name: 'Anti-Ragging',
       location: 'Sports Complex & Batch Communications',
       attachment_url: null,
-      ai_classification: { category: 'complaint', suggested_department: 'Anti-Ragging & Discipline Cell', confidence: 0.96, urgency: 'high', summary: 'Student Cyberbullying & Hallway Harassment', problem: 'Targeted Bullying & Verbal Abuse' },
+      ai_classification: { category: 'complaint', suggested_department: 'Anti-Ragging', confidence: 0.96, urgency: 'high', summary: 'Student Cyberbullying & Hallway Harassment', problem: 'Targeted Bullying & Verbal Abuse' },
       created_at: new Date(Date.now() - 86400000).toISOString(),
       updated_at: new Date(Date.now() - 28800000).toISOString(),
       resolved_at: null
@@ -170,10 +172,11 @@ function initializeLocalStorageBackend() {
       category: 'complaint',
       urgency: 'high',
       status: 'resolved',
-      department_id: '11111111-1111-1111-1111-111111111110', // Anti-Ragging & Discipline Cell
+      department_id: '11111111-1111-1111-1111-111111111110', // Anti-Ragging
+      department_name: 'Anti-Ragging',
       location: 'Academic Block B, North Staircase',
       attachment_url: null,
-      ai_classification: { category: 'complaint', suggested_department: 'Anti-Ragging & Discipline Cell', confidence: 0.95, urgency: 'high', summary: 'Block B Corridor Altercation', problem: 'Student Misconduct & Dispute Mediation' },
+      ai_classification: { category: 'complaint', suggested_department: 'Anti-Ragging', confidence: 0.95, urgency: 'high', summary: 'Block B Corridor Altercation', problem: 'Student Misconduct & Dispute Mediation' },
       created_at: new Date(Date.now() - 259200000).toISOString(),
       updated_at: new Date(Date.now() - 86400000).toISOString(),
       resolved_at: new Date(Date.now() - 86400000).toISOString()
@@ -458,9 +461,13 @@ export async function loginAdminUser(email, password) {
     return sessionData;
   }
 
-  // Demo Auth fallback: find matching admin by email or default to CTS
-  const foundAdmin = DEMO_ADMINS.find(a => a.email.toLowerCase() === email.toLowerCase()) || DEMO_ADMINS[0];
-  const dept = DEPARTMENTS_LIST.find(d => d.code === foundAdmin.deptCode) || DEPARTMENTS_LIST[0];
+  // Demo Auth fallback: find matching admin by email or default to Anti-Ragging / CTS
+  const emailLower = (email || '').toLowerCase();
+  const foundAdmin = DEMO_ADMINS.find(a => a.email.toLowerCase() === emailLower) ||
+    (emailLower.includes('ragging') || emailLower.includes('discipline') ? DEMO_ADMINS[0] : DEMO_ADMINS[1]);
+  const dept = DEPARTMENTS_LIST.find(d => d.code === foundAdmin.deptCode) ||
+    (foundAdmin.deptCode === 'DISCIPLINE' ? DEPARTMENTS_LIST.find(d => d.code === 'ANTI_RAGGING') : null) ||
+    DEPARTMENTS_LIST[0];
 
   const adminSession = {
     id: `admin-${foundAdmin.deptCode.toLowerCase()}`,

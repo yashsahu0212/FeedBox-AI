@@ -63,6 +63,8 @@ export default function AdminDashboard({ adminUser, onLogout, onSwitchAdmin }) {
     }
   };
 
+  const isAntiRagging = adminUser.department?.code === 'ANTI_RAGGING' || adminUser.department?.code === 'DISCIPLINE';
+
   return (
     <div className="max-w-7xl mx-auto w-full py-6 sm:py-10 px-4 sm:px-6 flex flex-col gap-6">
       
@@ -72,16 +74,16 @@ export default function AdminDashboard({ adminUser, onLogout, onSwitchAdmin }) {
         {/* Left: Department Title & Status */}
         <div className="flex items-center gap-3">
           <div className={`w-11 h-11 rounded-xl text-white flex items-center justify-center font-bold text-base shadow-2xs shrink-0 ${
-            adminUser.department?.code === 'DISCIPLINE' ? 'bg-red-700' : 'bg-[#1b1b1e]'
+            isAntiRagging ? 'bg-red-700' : 'bg-[#1b1b1e]'
           }`}>
-            {isSuperAdmin ? 'SA' : (adminUser.department?.code === 'DISCIPLINE' ? '🛡️' : (adminUser.department?.code || 'DEPT'))}
+            {isSuperAdmin ? 'SA' : (isAntiRagging ? '🛡️' : (adminUser.department?.code || 'DEPT'))}
           </div>
           <div>
             <div className="flex items-center gap-2">
               <span className={`font-label-sm text-xs uppercase tracking-wider font-bold ${
-                adminUser.department?.code === 'DISCIPLINE' ? 'text-red-700' : 'text-[#39618c]'
+                isAntiRagging ? 'text-red-700' : 'text-[#39618c]'
               }`}>
-                {adminUser.department?.code === 'DISCIPLINE' ? '🛡️ Anti-Ragging & Vigilance Desk' : `Logged in as ${adminUser.name}`}
+                {isAntiRagging ? '🛡️ Anti-Ragging Desk' : `Logged in as ${adminUser.name}`}
               </span>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             </div>
@@ -103,7 +105,7 @@ export default function AdminDashboard({ adminUser, onLogout, onSwitchAdmin }) {
             >
               {DEPARTMENTS_LIST.map((d) => (
                 <option key={d.code} value={d.code}>
-                  {d.code === 'DISCIPLINE' ? '🛡️ ' : ''}{d.name} ({d.code})
+                  {(d.code === 'ANTI_RAGGING' || d.code === 'DISCIPLINE') ? '🛡️ ' : ''}{d.name} ({d.code})
                 </option>
               ))}
             </select>
@@ -124,7 +126,7 @@ export default function AdminDashboard({ adminUser, onLogout, onSwitchAdmin }) {
       </div>
 
       {/* Anti-Ragging & Disciplinary Protocol Alert Banner */}
-      {adminUser.department?.code === 'DISCIPLINE' && (
+      {isAntiRagging && (
         <div className="px-5 py-3.5 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-950 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-2xs">
           <div className="flex items-start md:items-center gap-2.5">
             <span className="material-symbols-outlined text-red-600 text-2xl shrink-0 select-none">

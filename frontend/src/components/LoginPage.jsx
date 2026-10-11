@@ -7,19 +7,15 @@ import {
 } from '../lib/supabase';
 
 export default function LoginPage({ onLoginSuccess }) {
-  const [activeRoleTab, setActiveRoleTab] = useState('student'); // 'student' | 'admin' | 'discipline'
+  const [activeRoleTab, setActiveRoleTab] = useState('student'); // 'student' | 'admin'
   
   // Student form state
   const [studentInput, setStudentInput] = useState('student@college.edu');
   const [studentPassword, setStudentPassword] = useState('student123');
 
   // Admin form state
-  const [adminEmail, setAdminEmail] = useState('cts.admin@college.edu');
+  const [adminEmail, setAdminEmail] = useState('antiragging.admin@college.edu');
   const [adminPassword, setAdminPassword] = useState('password123');
-
-  // Discipline & Anti-Ragging form state
-  const [disciplineEmail, setDisciplineEmail] = useState('antiragging.admin@college.edu');
-  const [disciplinePassword, setDisciplinePassword] = useState('password123');
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -56,22 +52,6 @@ export default function LoginPage({ onLoginSuccess }) {
     }
   };
 
-  // Handle Discipline Form Submit
-  const handleDisciplineSubmit = async (e) => {
-    e.preventDefault();
-    setErrorMsg('');
-    setIsLoading(true);
-
-    try {
-      const adminProfile = await loginAdminUser(disciplineEmail, disciplinePassword);
-      setIsLoading(false);
-      onLoginSuccess(adminProfile);
-    } catch (err) {
-      setIsLoading(false);
-      setErrorMsg(err.message || 'Invalid anti-ragging credentials or authorization error.');
-    }
-  };
-
   // Quick Demo Login Handlers
   const handleQuickStudentLogin = async (student) => {
     setIsLoading(true);
@@ -89,21 +69,9 @@ export default function LoginPage({ onLoginSuccess }) {
   const handleQuickAdminLogin = async (admin) => {
     setIsLoading(true);
     setErrorMsg('');
+    setAdminEmail(admin.email);
     try {
       const adminProfile = await loginAdminUser(admin.email, 'password123');
-      setIsLoading(false);
-      onLoginSuccess(adminProfile);
-    } catch (err) {
-      setIsLoading(false);
-      setErrorMsg(err.message);
-    }
-  };
-
-  const handleQuickDisciplineLogin = async () => {
-    setIsLoading(true);
-    setErrorMsg('');
-    try {
-      const adminProfile = await loginAdminUser('antiragging.admin@college.edu', 'password123');
       setIsLoading(false);
       onLoginSuccess(adminProfile);
     } catch (err) {
@@ -186,22 +154,22 @@ export default function LoginPage({ onLoginSuccess }) {
         {/* Right Column: Unified Dual Login Form Card */}
         <div className="lg:col-span-7 bg-white rounded-3xl shadow-xl border border-[#e5e2e1] p-6 sm:p-8 flex flex-col gap-6">
           
-          {/* 3 Role Selector Tabs */}
-          <div className="grid grid-cols-3 p-1.5 bg-[#f7f3f2] rounded-2xl border border-[#e5e2e1] gap-1">
+          {/* 2 Role Selector Tabs: Student Login & Department Staff Login */}
+          <div className="grid grid-cols-2 p-1.5 bg-[#f7f3f2] rounded-2xl border border-[#e5e2e1] gap-1">
             <button
               type="button"
               onClick={() => {
                 setActiveRoleTab('student');
                 setErrorMsg('');
               }}
-              className={`py-2 px-2 rounded-xl font-label-md text-[11px] sm:text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`py-2.5 px-3 rounded-xl font-label-md text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 activeRoleTab === 'student'
                   ? 'bg-white text-[#1c1b1c] shadow-xs'
                   : 'text-[#77767b] hover:text-[#1c1b1c]'
               }`}
             >
-              <span className="material-symbols-outlined text-base">school</span>
-              <span>Student</span>
+              <span className="material-symbols-outlined text-lg">school</span>
+              <span>Student Login</span>
             </button>
 
             <button
@@ -210,30 +178,14 @@ export default function LoginPage({ onLoginSuccess }) {
                 setActiveRoleTab('admin');
                 setErrorMsg('');
               }}
-              className={`py-2 px-2 rounded-xl font-label-md text-[11px] sm:text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`py-2.5 px-3 rounded-xl font-label-md text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 activeRoleTab === 'admin'
                   ? 'bg-[#1b1b1e] text-white shadow-xs'
                   : 'text-[#77767b] hover:text-[#1c1b1c]'
               }`}
             >
-              <span className="material-symbols-outlined text-base">domain</span>
-              <span>Dept Admin</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setActiveRoleTab('discipline');
-                setErrorMsg('');
-              }}
-              className={`py-2 px-2 rounded-xl font-label-md text-[11px] sm:text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                activeRoleTab === 'discipline'
-                  ? 'bg-red-700 text-white shadow-xs ring-1 ring-red-400'
-                  : 'text-red-700 hover:text-red-900 hover:bg-red-50'
-              }`}
-            >
-              <span className="material-symbols-outlined text-base">shield</span>
-              <span className="truncate">Anti-Ragging</span>
+              <span className="material-symbols-outlined text-lg">domain</span>
+              <span>Department Staff Login</span>
             </button>
           </div>
 
@@ -250,16 +202,12 @@ export default function LoginPage({ onLoginSuccess }) {
             <h3 className="text-lg font-bold text-[#1c1b1c]">
               {activeRoleTab === 'student'
                 ? 'Student Account Portal'
-                : activeRoleTab === 'discipline'
-                ? 'Anti-Ragging, Bullying & Fighting Vigilance Desk'
                 : 'Department Staff Authorization'}
             </h3>
             <p className="text-xs text-[#77767b] mt-0.5">
               {activeRoleTab === 'student'
                 ? 'Sign in using your institutional email or Roll Number to access your tickets.'
-                : activeRoleTab === 'discipline'
-                ? 'Proctorial vigilance access to monitor campus incidents of ragging, bullying, physical fighting & student harassment.'
-                : 'Sign in with your department email to manage ticket queues and RLS data.'}
+                : 'Sign in with your department staff email to manage ticket queues and RLS data.'}
             </p>
           </div>
 
@@ -326,7 +274,7 @@ export default function LoginPage({ onLoginSuccess }) {
             </form>
           )}
 
-          {/* ADMIN STAFF LOGIN FORM */}
+          {/* DEPARTMENT STAFF LOGIN FORM */}
           {activeRoleTab === 'admin' && (
             <form onSubmit={handleAdminSubmit} className="flex flex-col gap-4">
               <div>
@@ -343,7 +291,7 @@ export default function LoginPage({ onLoginSuccess }) {
                     required
                     value={adminEmail}
                     onChange={(e) => setAdminEmail(e.target.value)}
-                    placeholder="cts.admin@college.edu"
+                    placeholder="antiragging.admin@college.edu or cts.admin@college.edu"
                     className="w-full bg-[#f7f3f2] text-xs pl-10 pr-3 py-3 rounded-xl border border-[#e5e2e1] text-[#1c1b1c] focus:outline-none focus:ring-2 focus:ring-[#1b1b1e] focus:bg-white transition-all"
                   />
                 </div>
@@ -351,7 +299,7 @@ export default function LoginPage({ onLoginSuccess }) {
 
               <div>
                 <label htmlFor="admin-pass-input" className="block text-xs font-semibold text-[#1c1b1c] mb-1.5">
-                  Admin Password
+                  Password
                 </label>
                 <div className="relative">
                   <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base text-[#77767b]">
@@ -377,96 +325,14 @@ export default function LoginPage({ onLoginSuccess }) {
                 {isLoading ? (
                   <>
                     <span className="material-symbols-outlined text-sm animate-spin">sync</span>
-                    <span>Authenticating Department Admin...</span>
+                    <span>Authenticating Department Staff...</span>
                   </>
                 ) : (
                   <>
-                    <span>Authenticate Admin Staff</span>
+                    <span>Authenticate Department Staff</span>
                     <span className="material-symbols-outlined text-base">verified</span>
                   </>
                 )}
-              </button>
-            </form>
-          )}
-
-          {/* ANTI-RAGGING & DISCIPLINARY SQUAD LOGIN FORM */}
-          {activeRoleTab === 'discipline' && (
-            <form onSubmit={handleDisciplineSubmit} className="flex flex-col gap-4">
-              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-900 text-xs flex items-start gap-2.5">
-                <span className="material-symbols-outlined text-lg text-red-600 shrink-0 select-none">policy</span>
-                <div>
-                  <strong className="block font-bold">Zero-Tolerance Anti-Ragging Cell Oversight</strong>
-                  <span className="text-[11px] text-red-800">
-                    Confidential proctorial authentication for monitoring, investigating, and resolving complaints involving ragging, bullying, physical fighting & student harassment.
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="discipline-email-input" className="block text-xs font-semibold text-[#1c1b1c] mb-1.5">
-                  Proctorial / Anti-Ragging Email
-                </label>
-                <div className="relative">
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base text-[#77767b]">
-                    badge
-                  </span>
-                  <input
-                    id="discipline-email-input"
-                    type="email"
-                    required
-                    value={disciplineEmail}
-                    onChange={(e) => setDisciplineEmail(e.target.value)}
-                    placeholder="antiragging.admin@college.edu"
-                    className="w-full bg-[#f7f3f2] text-xs pl-10 pr-3 py-3 rounded-xl border border-[#e5e2e1] text-[#1c1b1c] focus:outline-none focus:ring-2 focus:ring-red-600 focus:bg-white transition-all font-mono"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="discipline-pass-input" className="block text-xs font-semibold text-[#1c1b1c] mb-1.5">
-                  Vigilance Password
-                </label>
-                <div className="relative">
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base text-[#77767b]">
-                    key
-                  </span>
-                  <input
-                    id="discipline-pass-input"
-                    type="password"
-                    required
-                    value={disciplinePassword}
-                    onChange={(e) => setDisciplinePassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full bg-[#f7f3f2] text-xs pl-10 pr-3 py-3 rounded-xl border border-[#e5e2e1] text-[#1c1b1c] focus:outline-none focus:ring-2 focus:ring-red-600 focus:bg-white transition-all"
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full h-11 bg-red-700 hover:bg-red-800 text-white font-label-md text-xs font-bold rounded-xl active:scale-[0.99] disabled:opacity-50 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer mt-2"
-              >
-                {isLoading ? (
-                  <>
-                    <span className="material-symbols-outlined text-sm animate-spin">sync</span>
-                    <span>Authenticating Anti-Ragging Officer...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Enter Anti-Ragging Vigilance Dashboard</span>
-                    <span className="material-symbols-outlined text-base">shield</span>
-                  </>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleQuickDisciplineLogin}
-                className="w-full py-2.5 rounded-xl border border-red-300 bg-red-50 hover:bg-red-100 text-red-800 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-              >
-                <span className="material-symbols-outlined text-sm">bolt</span>
-                <span>Fast 1-Click Login (Proctor / Anti-Ragging Officer)</span>
               </button>
             </form>
           )}
@@ -480,50 +346,13 @@ export default function LoginPage({ onLoginSuccess }) {
               <span className="bg-white px-2 text-[#77767b]">
                 {activeRoleTab === 'student'
                   ? 'Quick Demo Student Accounts'
-                  : activeRoleTab === 'discipline'
-                  ? 'Anti-Ragging Squad Demo Profiles'
                   : 'Quick Demo Admin Departments'}
               </span>
             </div>
           </div>
 
           {/* QUICK DEMO ACCOUNTS */}
-          {activeRoleTab === 'discipline' ? (
-            <div className="flex flex-col gap-2">
-              <span className="text-[11px] text-[#77767b] font-medium text-center">
-                Click for instant proctorial demo access:
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleQuickAdminLogin(DEMO_ADMINS[0])}
-                  className="p-3 rounded-xl border border-red-200 bg-red-50 hover:bg-red-700 hover:text-white transition-all text-left flex items-center gap-2.5 cursor-pointer group"
-                >
-                  <div className="w-8 h-8 rounded-full bg-red-700 text-white flex items-center justify-center shrink-0">
-                    <span className="material-symbols-outlined text-base">shield</span>
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold block group-hover:text-white">Anti-Ragging Squad</span>
-                    <span className="text-[10px] opacity-80 block truncate">{DEMO_ADMINS[0].name}</span>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleQuickAdminLogin(DEMO_ADMINS[1])}
-                  className="p-3 rounded-xl border border-red-200 bg-red-50 hover:bg-red-700 hover:text-white transition-all text-left flex items-center gap-2.5 cursor-pointer group"
-                >
-                  <div className="w-8 h-8 rounded-full bg-red-700 text-white flex items-center justify-center shrink-0">
-                    <span className="material-symbols-outlined text-base">policy</span>
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold block group-hover:text-white">Disciplinary Committee</span>
-                    <span className="text-[10px] opacity-80 block truncate">{DEMO_ADMINS[1].name}</span>
-                  </div>
-                </button>
-              </div>
-            </div>
-          ) : activeRoleTab === 'student' ? (
+          {activeRoleTab === 'student' ? (
             <div className="flex flex-col gap-2">
               <span className="text-[11px] text-[#77767b] font-medium text-center">
                 Click any demo profile for instant student login:
@@ -555,25 +384,28 @@ export default function LoginPage({ onLoginSuccess }) {
                 Click to test department-specific RLS & Dashboards:
               </span>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => handleQuickAdminLogin(DEMO_ADMINS[0])}
-                  className="px-2.5 py-2 rounded-xl border border-red-300 bg-red-50 hover:bg-red-700 hover:text-white transition-all text-left text-[11px] flex flex-col cursor-pointer col-span-2 sm:col-span-1"
-                >
-                  <span className="font-bold text-red-900 group-hover:text-white">🛡️ Anti-Ragging</span>
-                  <span className="text-[10px] opacity-80 truncate">Ragging & Fighting</span>
-                </button>
-                {DEMO_ADMINS.slice(2, 9).map((admin) => (
-                  <button
-                    key={admin.deptCode}
-                    type="button"
-                    onClick={() => handleQuickAdminLogin(admin)}
-                    className="px-2.5 py-2 rounded-xl border border-[#e5e2e1] bg-[#f7f3f2] hover:bg-[#39618c] hover:text-white transition-all text-left text-[11px] flex flex-col cursor-pointer"
-                  >
-                    <span className="font-bold">{admin.deptCode} Desk</span>
-                    <span className="text-[10px] opacity-80 truncate">{admin.name.split(' ')[0]}</span>
-                  </button>
-                ))}
+                {DEMO_ADMINS.map((admin) => {
+                  const isAntiRagging = admin.deptCode === 'ANTI_RAGGING' || admin.deptCode === 'DISCIPLINE';
+                  return (
+                    <button
+                      key={`${admin.deptCode}-${admin.email}`}
+                      type="button"
+                      onClick={() => handleQuickAdminLogin(admin)}
+                      className={`px-2.5 py-2 rounded-xl border transition-all text-left text-[11px] flex flex-col cursor-pointer ${
+                        isAntiRagging
+                          ? 'border-red-300 bg-red-50 hover:bg-red-700 hover:text-white text-red-900'
+                          : 'border-[#e5e2e1] bg-[#f7f3f2] hover:bg-[#39618c] hover:text-white'
+                      }`}
+                    >
+                      <span className="font-bold flex items-center gap-1">
+                        {isAntiRagging ? '🛡️ Anti-Ragging' : `${admin.deptCode} Desk`}
+                      </span>
+                      <span className="text-[10px] opacity-80 truncate">
+                        {isAntiRagging ? 'Ragging & Fighting' : admin.name.split(' ')[0]}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}

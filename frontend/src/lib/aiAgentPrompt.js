@@ -47,7 +47,7 @@ Think step by step about the user's INTENT and EMOTION:
 
 ### DEPARTMENTS (Select EXACTLY ONE):
 
-1. "Anti-Ragging & Discipline Cell" — Bullying, ragging, physical fighting, brawls, threats, intimidation, hazing, harassment, assault, violence, student misconduct.
+1. "Anti-Ragging" — Bullying, ragging, physical fighting, brawls, threats, intimidation, hazing, harassment, assault, violence, student misconduct.
 2. "Hostel" — Hostel rooms, mess food, washrooms, hostel maintenance, dorm facilities, laundry, geysers.
 3. "Maintenance" — Physical repairs: electrical, plumbing, HVAC/AC, fans, lighting, furniture, doors, locks, civil works.
 4. "CTS" — IT/tech: Wi-Fi, routers, network, VTOP portal, laptops, projectors.

@@ -129,21 +129,24 @@ export default function AdminLogin({ onLoginSuccess }) {
             Click to test department-specific RLS & Dashboards:
           </span>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-            {DEMO_ADMINS.slice(0, 10).map((admin) => (
-              <button
-                key={`${admin.deptCode}-${admin.email}`}
-                type="button"
-                onClick={() => handleQuickDemoLogin(admin)}
-                className={`px-2 py-1.5 rounded-lg border transition-all text-left text-[11px] flex flex-col cursor-pointer ${
-                  admin.deptCode === 'DISCIPLINE'
-                    ? 'border-red-300 bg-red-50 text-red-900 hover:bg-red-700 hover:text-white font-bold'
-                    : 'border-[#e5e2e1] bg-[#f7f3f2] hover:bg-[#1b1b1e] hover:text-white'
-                }`}
-              >
-                <span className="font-bold">{admin.deptCode === 'DISCIPLINE' ? '🛡️ DISCIPLINE' : admin.deptCode}</span>
-                <span className="text-[10px] opacity-80 truncate">{admin.deptCode === 'DISCIPLINE' ? 'Anti-Ragging' : admin.name.split(' ')[0]}</span>
-              </button>
-            ))}
+            {DEMO_ADMINS.slice(0, 10).map((admin) => {
+              const isAntiRagging = admin.deptCode === 'ANTI_RAGGING' || admin.deptCode === 'DISCIPLINE';
+              return (
+                <button
+                  key={`${admin.deptCode}-${admin.email}`}
+                  type="button"
+                  onClick={() => handleQuickDemoLogin(admin)}
+                  className={`px-2 py-1.5 rounded-lg border transition-all text-left text-[11px] flex flex-col cursor-pointer ${
+                    isAntiRagging
+                      ? 'border-red-300 bg-red-50 text-red-900 hover:bg-red-700 hover:text-white font-bold'
+                      : 'border-[#e5e2e1] bg-[#f7f3f2] hover:bg-[#1b1b1e] hover:text-white'
+                  }`}
+                >
+                  <span className="font-bold">{isAntiRagging ? '🛡️ Anti-Ragging' : admin.deptCode}</span>
+                  <span className="text-[10px] opacity-80 truncate">{isAntiRagging ? 'Ragging & Fighting' : admin.name.split(' ')[0]}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
