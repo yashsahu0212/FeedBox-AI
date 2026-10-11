@@ -12,8 +12,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
-// Initial 9 Departments definition
+// Initial Departments definition
 export const DEPARTMENTS_LIST = [
+  { id: '11111111-1111-1111-1111-111111111110', name: 'Anti-Ragging & Discipline Cell', code: 'DISCIPLINE', description: 'Zero-Tolerance Vigilance Desk for Ragging, Bullying, Physical Altercations, Harassment, and Disciplinary Misconduct' },
   { id: '11111111-1111-1111-1111-111111111101', name: 'CTS', code: 'CTS', description: 'Computer & Technology Services, Campus IT Infrastructure & Wi-Fi' },
   { id: '11111111-1111-1111-1111-111111111102', name: 'Administration', code: 'ADMIN', description: 'General Administrative Desk, Security, Transport, and Logistics' },
   { id: '11111111-1111-1111-1111-111111111103', name: 'Placement Cell', code: 'PLACEMENT', description: 'Career Services, Campus Recruitment Drives, and Corporate Liaison' },
@@ -27,6 +28,8 @@ export const DEPARTMENTS_LIST = [
 
 // Initial Admin Users for testing each department
 export const DEMO_ADMINS = [
+  { email: 'antiragging.admin@college.edu', name: 'Capt. Rajesh Sharma (Proctorial Board)', role: 'discipline_admin', deptCode: 'DISCIPLINE' },
+  { email: 'discipline.admin@college.edu', name: 'Dr. Meenakshi Sundaram (Anti-Ragging Squad)', role: 'discipline_admin', deptCode: 'DISCIPLINE' },
   { email: 'cts.admin@college.edu', name: 'Alex Vance', role: 'department_admin', deptCode: 'CTS' },
   { email: 'admin.manager@college.edu', name: 'Sarah Jenkins', role: 'department_manager', deptCode: 'ADMIN' },
   { email: 'placement.admin@college.edu', name: 'Rohan Sharma', role: 'department_admin', deptCode: 'PLACEMENT' },
@@ -71,6 +74,11 @@ export const DEMO_STUDENTS = [
 export function classifyReportDepartment(title = '', description = '') {
   const text = `${title} ${description}`.toLowerCase();
 
+  // High-priority check: Anti-Ragging, Bullying, Fighting, Violence, Harassment, Hazing
+  if (/ragging|rag\b|bully|bullying|fight|fighting|marpit|violence|harass|harassment|assault|beating|abuse|extortion|threat|intimidation|hazing|quarrel|physical clash/.test(text)) {
+    return DEPARTMENTS_LIST.find(d => d.code === 'DISCIPLINE');
+  }
+
   if (/wifi|wi-fi|internet|network|router|ip|mac|laptop|server|cloud|portal login|login issue|software|cyber|cts/.test(text)) {
     return DEPARTMENTS_LIST.find(d => d.code === 'CTS');
   }
@@ -92,7 +100,7 @@ export function classifyReportDepartment(title = '', description = '') {
   if (/course|lecture|syllabus|attendance|prof|faculty|lab experiment|assignment|academic/.test(text)) {
     return DEPARTMENTS_LIST.find(d => d.code === 'ACADEMIC');
   }
-  if (/event|club|sport|gym|ground|cultural|fest|ragging|welfare|counseling/.test(text)) {
+  if (/event|club|sport|gym|ground|cultural|fest|welfare|counseling/.test(text)) {
     return DEPARTMENTS_LIST.find(d => d.code === 'WELFARE');
   }
   return DEPARTMENTS_LIST.find(d => d.code === 'ADMIN');
@@ -109,8 +117,72 @@ const STORAGE_KEY_USER = 'feedboxai_current_user';
 
 // Initialize default seed state into LocalStorage if empty
 function initializeLocalStorageBackend() {
+  const disciplineSeeds = [
+    {
+      id: '22222222-2222-2222-2222-222222222210',
+      title: 'Seniors forcing 1st-year students into late-night ragging in Hostel Block C',
+      description: 'A group of 3rd year seniors entered Room 214 around 11:30 PM, forcing junior freshers to do late-night physical chores and issuing threats if reported. Immediate proctor intervention requested.',
+      category: 'complaint',
+      urgency: 'critical',
+      status: 'processing',
+      department_id: '11111111-1111-1111-1111-111111111110', // Anti-Ragging & Discipline Cell
+      location: 'Hostel Block C, Floor 2, Room 214',
+      attachment_url: null,
+      ai_classification: { category: 'complaint', suggested_department: 'Anti-Ragging & Discipline Cell', confidence: 0.99, urgency: 'critical', summary: 'Hostel Block C Late-Night Ragging Incident', problem: 'Ragging & Intimidation Violation' },
+      created_at: new Date(Date.now() - 7200000).toISOString(),
+      updated_at: new Date(Date.now() - 3600000).toISOString(),
+      resolved_at: null
+    },
+    {
+      id: '22222222-2222-2222-2222-222222222211',
+      title: 'Violent physical brawl and fighting near South Cafeteria exit',
+      description: 'Violent physical altercation erupted between two student groups near the food court staircase. Security guards intervened, medical assistance called for minor injury.',
+      category: 'complaint',
+      urgency: 'critical',
+      status: 'submitted',
+      department_id: '11111111-1111-1111-1111-111111111110', // Anti-Ragging & Discipline Cell
+      location: 'Campus Food Court & Cafeteria South Exit',
+      attachment_url: null,
+      ai_classification: { category: 'complaint', suggested_department: 'Anti-Ragging & Discipline Cell', confidence: 0.98, urgency: 'critical', summary: 'Cafeteria Physical Brawl and Fighting Clash', problem: 'Physical Fighting & Campus Violence' },
+      created_at: new Date(Date.now() - 14400000).toISOString(),
+      updated_at: new Date(Date.now() - 14400000).toISOString(),
+      resolved_at: null
+    },
+    {
+      id: '22222222-2222-2222-2222-222222222212',
+      title: 'Targeted cyberbullying, hallway intimidation and verbal abuse',
+      description: 'Persistent intimidation, abusive slurs and cyber threats directed toward a 1st year student across college WhatsApp batch groups and the sports complex.',
+      category: 'complaint',
+      urgency: 'high',
+      status: 'processing',
+      department_id: '11111111-1111-1111-1111-111111111110', // Anti-Ragging & Discipline Cell
+      location: 'Sports Complex & Batch Communications',
+      attachment_url: null,
+      ai_classification: { category: 'complaint', suggested_department: 'Anti-Ragging & Discipline Cell', confidence: 0.96, urgency: 'high', summary: 'Student Cyberbullying & Hallway Harassment', problem: 'Targeted Bullying & Verbal Abuse' },
+      created_at: new Date(Date.now() - 86400000).toISOString(),
+      updated_at: new Date(Date.now() - 28800000).toISOString(),
+      resolved_at: null
+    },
+    {
+      id: '22222222-2222-2222-2222-222222222213',
+      title: 'Resolved: Heated verbal confrontation defused in Academic Block B',
+      description: 'Verbal dispute and aggressive shoving in Block B corridor. Proctorial board conducted mediation hearing with parents and signed behavioral bonds.',
+      category: 'complaint',
+      urgency: 'high',
+      status: 'resolved',
+      department_id: '11111111-1111-1111-1111-111111111110', // Anti-Ragging & Discipline Cell
+      location: 'Academic Block B, North Staircase',
+      attachment_url: null,
+      ai_classification: { category: 'complaint', suggested_department: 'Anti-Ragging & Discipline Cell', confidence: 0.95, urgency: 'high', summary: 'Block B Corridor Altercation', problem: 'Student Misconduct & Dispute Mediation' },
+      created_at: new Date(Date.now() - 259200000).toISOString(),
+      updated_at: new Date(Date.now() - 86400000).toISOString(),
+      resolved_at: new Date(Date.now() - 86400000).toISOString()
+    }
+  ];
+
   if (!localStorage.getItem(STORAGE_KEY_REPORTS)) {
     const seedReports = [
+      ...disciplineSeeds,
       {
         id: '22222222-2222-2222-2222-222222222201',
         title: 'Wi-Fi signal drops continuously in Library 2nd Floor',
@@ -188,6 +260,17 @@ function initializeLocalStorageBackend() {
       }
     ];
     localStorage.setItem(STORAGE_KEY_REPORTS, JSON.stringify(seedReports));
+  } else {
+    // Migration: ensure discipline reports exist even if reports were previously seeded
+    try {
+      const existing = JSON.parse(localStorage.getItem(STORAGE_KEY_REPORTS) || '[]');
+      const hasDiscipline = existing.some(r => r.department_id === '11111111-1111-1111-1111-111111111110');
+      if (!hasDiscipline) {
+        localStorage.setItem(STORAGE_KEY_REPORTS, JSON.stringify([...disciplineSeeds, ...existing]));
+      }
+    } catch {
+      // fallback
+    }
   }
 
   if (!localStorage.getItem(STORAGE_KEY_STATUS_HISTORY)) {

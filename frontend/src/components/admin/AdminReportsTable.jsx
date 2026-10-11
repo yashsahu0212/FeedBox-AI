@@ -83,9 +83,123 @@ export default function AdminReportsTable({ reports, onSelectReport }) {
     }
   };
 
+  // Status Counts for Top Triage Bar
+  const countAll = reports.length;
+  const countProcessing = reports.filter(r => (r.status || '').toLowerCase() === 'processing').length;
+  const countSubmitted = reports.filter(r => (r.status || '').toLowerCase() === 'submitted').length;
+  const countResolved = reports.filter(r => (r.status || '').toLowerCase() === 'resolved').length;
+  const countRejected = reports.filter(r => (r.status || '').toLowerCase() === 'rejected').length;
+
   return (
-    <div className="bg-white rounded-2xl shadow-xs border border-[#e5e2e1] p-4 sm:p-6 flex flex-col gap-4">
+    <div className="bg-white rounded-2xl shadow-xs border border-[#e5e2e1] p-4 sm:p-6 flex flex-col gap-5">
       
+      {/* Top Status Triage Bar: Visible immediately without scrolling */}
+      <div className="flex flex-col gap-2 bg-[#f7f3f2] p-3 rounded-2xl border border-[#e5e2e1]">
+        <div className="flex items-center justify-between px-1">
+          <span className="text-[11px] font-bold text-[#47464b] uppercase tracking-wider flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-sm text-[#39618c]">fact_check</span>
+            Quick Status Filter & Counts
+          </span>
+          <span className="text-[11px] text-[#77767b]">
+            Showing: <strong className="text-[#1c1b1c]">{sortedReports.length}</strong> of {countAll}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          {/* All */}
+          <button
+            type="button"
+            onClick={() => setStatusFilter('all')}
+            className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-between cursor-pointer ${
+              statusFilter === 'all'
+                ? 'bg-[#1b1b1e] text-white border-[#1b1b1e] shadow-xs'
+                : 'bg-white text-[#47464b] border-[#e5e2e1] hover:bg-slate-100'
+            }`}
+          >
+            <span>All</span>
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${statusFilter === 'all' ? 'bg-white/20 text-white' : 'bg-slate-200 text-[#1c1b1c]'}`}>
+              {countAll}
+            </span>
+          </button>
+
+          {/* Processing */}
+          <button
+            type="button"
+            onClick={() => setStatusFilter('processing')}
+            className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-between cursor-pointer ${
+              statusFilter === 'processing'
+                ? 'bg-blue-600 text-white border-blue-500 shadow-xs'
+                : 'bg-white text-blue-900 border-[#a2cafb] hover:bg-blue-50'
+            }`}
+          >
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+              Processing
+            </span>
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${statusFilter === 'processing' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-900'}`}>
+              {countProcessing}
+            </span>
+          </button>
+
+          {/* Submitted */}
+          <button
+            type="button"
+            onClick={() => setStatusFilter('submitted')}
+            className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-between cursor-pointer ${
+              statusFilter === 'submitted'
+                ? 'bg-amber-600 text-white border-amber-500 shadow-xs'
+                : 'bg-white text-amber-900 border-amber-300 hover:bg-amber-50'
+            }`}
+          >
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+              Submitted
+            </span>
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${statusFilter === 'submitted' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-900'}`}>
+              {countSubmitted}
+            </span>
+          </button>
+
+          {/* Resolved */}
+          <button
+            type="button"
+            onClick={() => setStatusFilter('resolved')}
+            className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-between cursor-pointer ${
+              statusFilter === 'resolved'
+                ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs'
+                : 'bg-white text-emerald-900 border-emerald-300 hover:bg-emerald-50'
+            }`}
+          >
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+              Resolved
+            </span>
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${statusFilter === 'resolved' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-900'}`}>
+              {countResolved}
+            </span>
+          </button>
+
+          {/* Rejected */}
+          <button
+            type="button"
+            onClick={() => setStatusFilter('rejected')}
+            className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-between cursor-pointer col-span-2 sm:col-span-1 ${
+              statusFilter === 'rejected'
+                ? 'bg-rose-600 text-white border-rose-500 shadow-xs'
+                : 'bg-white text-rose-900 border-rose-300 hover:bg-rose-50'
+            }`}
+          >
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+              Rejected
+            </span>
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${statusFilter === 'rejected' ? 'bg-white/20 text-white' : 'bg-rose-100 text-rose-900'}`}>
+              {countRejected}
+            </span>
+          </button>
+        </div>
+      </div>
+
       {/* Controls Strip */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
         {/* Search */}
@@ -109,13 +223,13 @@ export default function AdminReportsTable({ reports, onSelectReport }) {
 
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-2">
-          {/* Status filter */}
+          {/* Status filter dropdown */}
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-[#f7f3f2] text-xs px-3 py-2 rounded-xl border border-[#e5e2e1] text-[#1c1b1c] focus:outline-none"
+            className="bg-[#f7f3f2] text-xs px-3 py-2 rounded-xl border border-[#e5e2e1] text-[#1c1b1c] focus:outline-none font-medium"
           >
-            <option value="all">Status: All</option>
+            <option value="all">Filter: All Statuses</option>
             <option value="submitted">Submitted</option>
             <option value="processing">Processing</option>
             <option value="resolved">Resolved</option>
@@ -126,7 +240,7 @@ export default function AdminReportsTable({ reports, onSelectReport }) {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="bg-[#f7f3f2] text-xs px-3 py-2 rounded-xl border border-[#e5e2e1] text-[#1c1b1c] focus:outline-none"
+            className="bg-[#f7f3f2] text-xs px-3 py-2 rounded-xl border border-[#e5e2e1] text-[#1c1b1c] focus:outline-none font-medium"
           >
             <option value="all">Category: All</option>
             <option value="issue">Issue</option>
@@ -226,10 +340,10 @@ export default function AdminReportsTable({ reports, onSelectReport }) {
                         e.stopPropagation();
                         onSelectReport(report);
                       }}
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-[#39618c] hover:underline"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1b1b1e] hover:bg-[#313030] text-white text-xs font-semibold rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer"
                     >
-                      <span>Manage</span>
-                      <span className="material-symbols-outlined text-sm">open_in_new</span>
+                      <span>Manage Report</span>
+                      <span className="material-symbols-outlined text-sm">tune</span>
                     </button>
                   </td>
                 </tr>

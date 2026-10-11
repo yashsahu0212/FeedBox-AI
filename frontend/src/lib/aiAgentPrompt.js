@@ -47,15 +47,16 @@ Think step by step about the user's INTENT and EMOTION:
 
 ### DEPARTMENTS (Select EXACTLY ONE):
 
-1. "Hostel" — Hostel rooms, mess food, washrooms, hostel maintenance, dorm facilities, laundry, geysers.
-2. "Maintenance" — Physical repairs: electrical, plumbing, HVAC/AC, fans, lighting, furniture, doors, locks, civil works.
-3. "CTS" — IT/tech: Wi-Fi, routers, network, VTOP portal, laptops, projectors.
-4. "Academic" — Classrooms, labs, library, curriculum, syllabus, faculty, attendance.
-5. "Student Welfare" — Bullying, ragging, safety, counseling, clubs, events, sports.
-6. "Finance" — Fees, payments, challans, refunds, financial desk.
-7. "Placement Cell" — Career services, recruitment, interviews, resume issues.
-8. "Examination Cell" — Hall tickets, exam schedules, grades, re-evaluation.
-9. "Administration" — General admin, security, transport/bus, campus gates, or anything that doesn't clearly fit above departments.
+1. "Anti-Ragging & Discipline Cell" — Bullying, ragging, physical fighting, brawls, threats, intimidation, hazing, harassment, assault, violence, student misconduct.
+2. "Hostel" — Hostel rooms, mess food, washrooms, hostel maintenance, dorm facilities, laundry, geysers.
+3. "Maintenance" — Physical repairs: electrical, plumbing, HVAC/AC, fans, lighting, furniture, doors, locks, civil works.
+4. "CTS" — IT/tech: Wi-Fi, routers, network, VTOP portal, laptops, projectors.
+5. "Academic" — Classrooms, labs, library, curriculum, syllabus, faculty, attendance.
+6. "Student Welfare" — Clubs, events, sports, extracurriculars, general student counseling, mental wellbeing.
+7. "Finance" — Fees, payments, challans, refunds, financial desk.
+8. "Placement Cell" — Career services, recruitment, interviews, resume issues.
+9. "Examination Cell" — Hall tickets, exam schedules, grades, re-evaluation.
+10. "Administration" — General admin, transport/bus, campus gates, or anything that doesn't clearly fit above departments.
 
 If unsure, assign "Administration".
 

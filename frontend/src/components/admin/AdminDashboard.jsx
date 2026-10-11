@@ -71,13 +71,17 @@ export default function AdminDashboard({ adminUser, onLogout, onSwitchAdmin }) {
         
         {/* Left: Department Title & Status */}
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-[#1b1b1e] text-white flex items-center justify-center font-bold text-base shadow-2xs shrink-0">
-            {isSuperAdmin ? 'SA' : (adminUser.department?.code || 'DEPT')}
+          <div className={`w-11 h-11 rounded-xl text-white flex items-center justify-center font-bold text-base shadow-2xs shrink-0 ${
+            adminUser.department?.code === 'DISCIPLINE' ? 'bg-red-700' : 'bg-[#1b1b1e]'
+          }`}>
+            {isSuperAdmin ? 'SA' : (adminUser.department?.code === 'DISCIPLINE' ? '🛡️' : (adminUser.department?.code || 'DEPT'))}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-label-sm text-xs uppercase tracking-wider text-[#39618c] font-bold">
-                Logged in as {adminUser.name}
+              <span className={`font-label-sm text-xs uppercase tracking-wider font-bold ${
+                adminUser.department?.code === 'DISCIPLINE' ? 'text-red-700' : 'text-[#39618c]'
+              }`}>
+                {adminUser.department?.code === 'DISCIPLINE' ? '🛡️ Anti-Ragging & Vigilance Desk' : `Logged in as ${adminUser.name}`}
               </span>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             </div>
@@ -99,7 +103,7 @@ export default function AdminDashboard({ adminUser, onLogout, onSwitchAdmin }) {
             >
               {DEPARTMENTS_LIST.map((d) => (
                 <option key={d.code} value={d.code}>
-                  {d.name} ({d.code})
+                  {d.code === 'DISCIPLINE' ? '🛡️ ' : ''}{d.name} ({d.code})
                 </option>
               ))}
             </select>
@@ -118,6 +122,31 @@ export default function AdminDashboard({ adminUser, onLogout, onSwitchAdmin }) {
         </div>
 
       </div>
+
+      {/* Anti-Ragging & Disciplinary Protocol Alert Banner */}
+      {adminUser.department?.code === 'DISCIPLINE' && (
+        <div className="px-5 py-3.5 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-950 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-start md:items-center gap-2.5">
+            <span className="material-symbols-outlined text-red-600 text-2xl shrink-0 select-none">
+              shield
+            </span>
+            <div>
+              <strong className="block text-red-900 font-bold text-sm">
+                Anti-Ragging, Bullying & Fighting Oversight Protocol Active
+              </strong>
+              <span className="text-red-800 text-xs">
+                Zero-tolerance vigilance queue monitoring campus disciplinary complaints, hostel ragging reports, student bullying, and physical altercation incidents.
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="bg-red-700 text-white font-mono text-[11px] px-3 py-1 rounded-xl font-bold flex items-center gap-1 shadow-xs">
+              <span className="material-symbols-outlined text-xs">call</span>
+              <span>Hotline: Ext 1091 / 1800-180-5522</span>
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* RLS Enforcement Notice */}
       <div className="px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-xl text-xs text-[#001d36] flex items-center justify-between">

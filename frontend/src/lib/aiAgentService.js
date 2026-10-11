@@ -7,6 +7,7 @@ export function validateAndNormalizeAIResponse(rawObj, originalText = '') {
   const allowedCategories = ['Complaint', 'Issue', 'Feedback', 'Compliment'];
   const allowedUrgencies = ['Low', 'Medium', 'High', 'Critical'];
   const officialDepartments = [
+    'Anti-Ragging & Discipline Cell',
     'Hostel',
     'Maintenance',
     'CTS',
@@ -58,10 +59,11 @@ export function validateAndNormalizeAIResponse(rawObj, originalText = '') {
       department = matchedDept;
     } else {
       const dLower = deptStr.toLowerCase();
-      if (dLower.includes('hostel') || dLower.includes('mess') || dLower.includes('dorm')) department = 'Hostel';
+      if (dLower.includes('ragging') || dLower.includes('bully') || dLower.includes('fight') || dLower.includes('discipline')) department = 'Anti-Ragging & Discipline Cell';
+      else if (dLower.includes('hostel') || dLower.includes('mess') || dLower.includes('dorm')) department = 'Hostel';
       else if (dLower.includes('maint') || dLower.includes('repair') || dLower.includes('electric') || dLower.includes('plumb')) department = 'Maintenance';
       else if (dLower.includes('cts') || dLower.includes('it') || dLower.includes('tech') || dLower.includes('net')) department = 'CTS';
-      else if (dLower.includes('welfare') || dLower.includes('security') || dLower.includes('ragging') || dLower.includes('bully')) department = 'Student Welfare';
+      else if (dLower.includes('welfare') || dLower.includes('counseling') || dLower.includes('club')) department = 'Student Welfare';
       else if (dLower.includes('exam')) department = 'Examination Cell';
       else if (dLower.includes('place') || dLower.includes('career')) department = 'Placement Cell';
       else if (dLower.includes('finance') || dLower.includes('account') || dLower.includes('fee')) department = 'Finance';
@@ -159,8 +161,15 @@ export function runLocalAIAgentParser(text = '') {
   if (category === 'Compliment' && /\b(tea|exam days|night|motivation|studying enviroment|refreshment|food)\b/i.test(lowerText)) {
     problemType = 'Late-Night Exam Refreshment Appreciation';
     department = 'Administration';
-  } else if (/\b(bully|bullying|ragging|threat|harass|fight|violence|security|welfare|counseling|club|sport)\b/i.test(lowerText)) {
-    problemType = 'Bullying / Ragging & Student Safety Incident';
+  } else if (/\b(ragging|rag\b|bully|bullying|fight|fighting|marpit|violence|harass|harassment|assault|beating|abuse|extortion|threat|intimidation|hazing|clash)\b/i.test(lowerText)) {
+    problemType = lowerText.includes('ragging') || lowerText.includes('hazing')
+      ? 'Ragging & Junior Intimidation Violation'
+      : (lowerText.includes('fight') || lowerText.includes('assault') || lowerText.includes('brawl')
+          ? 'Physical Altercation & Campus Violence Clash'
+          : 'Targeted Bullying & Verbal Abuse Incident');
+    department = 'Anti-Ragging & Discipline Cell';
+  } else if (/\b(counseling|counselling|welfare|club|sport|fest|event|gym)\b/i.test(lowerText)) {
+    problemType = 'Student Welfare, Clubs & Activity Coordination';
     department = 'Student Welfare';
   } else if (/\b(ac|air condition|cooler|chiller|heating|hvac)\b/i.test(lowerText)) {
     problemType = 'HVAC / Classroom AC Malfunction';
@@ -203,7 +212,7 @@ export function runLocalAIAgentParser(text = '') {
 
   // 3. Determine Urgency according to system prompt rules
   let urgency = 'Medium';
-  const isSafetyEmergency = /\b(bully|bullying|ragging|threat|spark|sparks|sparking|hazard|fire|exposed wire|exposed live|electric shock|flooding|flood|emergency|danger|dangerous|theft|stolen|broken lock)\b/i.test(lowerText);
+  const isSafetyEmergency = /\b(bully|bullying|ragging|threat|fight|fighting|assault|brawl|violence|hazing|intimidation|spark|sparks|sparking|hazard|fire|exposed wire|exposed live|electric shock|flooding|flood|emergency|danger|dangerous|theft|stolen|broken lock)\b/i.test(lowerText);
   const isHighImpact = /\b(ac|air condition|wifi|wi-fi|internet|geyser|exam|lecture|classroom|pankha|fan|no water|power cut|asap|urgent|immediately)\b/i.test(lowerText);
   const isLowUrgency = /\b(minor|paint|scuff|squeak|drawer|chair|table|desk|slow|suggestion|feedback)\b/i.test(lowerText);
 
