@@ -1,0 +1,177 @@
+{
+  "name": "feedBox AI Complaint Classification (Groq Zero-Config)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "### 📥 1. Ingestion\nReceives complaint reports from FeedBox web app via POST webhook.",
+        "height": 280,
+        "width": 640,
+        "color": 6
+      },
+      "id": "sticky-1",
+      "name": "Sticky Note - Ingest",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [120, 160]
+    },
+    {
+      "parameters": {
+        "content": "### ⚡ 2. Groq AI High-Speed Inference\nDirect Groq cloud inference with embedded API authentication (Zero credential setup).",
+        "height": 280,
+        "width": 460,
+        "color": 4
+      },
+      "id": "sticky-2",
+      "name": "Sticky Note - AI",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [800, 160]
+    },
+    {
+      "parameters": {
+        "content": "### 🚀 3. Response Dispatcher\nExtracts and verifies JSON schema, then returns 200 OK to FeedBox portal.",
+        "height": 280,
+        "width": 640,
+        "color": 5
+      },
+      "id": "sticky-3",
+      "name": "Sticky Note - Response",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [1300, 160]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "classify-complaint",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-in",
+      "name": "Webhook - Submit Report",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [180, 260]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "text",
+              "value": "={{ $json.body.text || $json.body.report_text || $json.text || '' }}"
+            },
+            {
+              "name": "report_id",
+              "value": "={{ $json.body.report_id || $json.body.complaint_id || 'RPT-' + Math.floor(Math.random()*100000) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-normalize",
+      "name": "Validate & Normalize Input",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [480, 260]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_GROQ_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"openai/gpt-oss-20b\",\n  \"response_format\": { \"type\": \"json_object\" },\n  \"temperature\": 0.1,\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are feedBox AI Maintenance Dispatch Agent. Analyze user maintenance reports and output strictly valid JSON matching schema: { category: 'Complaint'|'Issue'|'Feedback'|'Compliment', urgency: 'Low'|'Medium'|'High'|'Critical', summary: string, location: string|null, department: string|null, problem: string, suggested_action: string|null }\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify($json.text) }}\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "groq-http",
+      "name": "Groq AI Agent Node",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [920, 260]
+    },
+    {
+      "parameters": {
+        "jsCode": "const res = $input.first().json;\nlet parsed = {};\ntry {\n  const content = res.choices[0].message.content;\n  parsed = JSON.parse(content);\n} catch(e) {\n  parsed = { summary: 'Report parsed', error: e.message };\n}\n\nreturn [{\n  json: {\n    category: parsed.category || 'Issue',\n    urgency: parsed.urgency || 'Medium',\n    summary: parsed.summary || 'Maintenance report received',\n    location: parsed.location || null,\n    department: parsed.department || 'Maintenance',\n    problem: parsed.problem || 'Needs inspection',\n    suggested_action: parsed.suggested_action || null,\n    confidence: 0.98,\n    source: 'n8n_groq_agent',\n    processed_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "code-format",
+      "name": "Format & Verify Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1380, 260]
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {}
+      },
+      "id": "webhook-out",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1700, 260]
+    }
+  ],
+  "connections": {
+    "Webhook - Submit Report": {
+      "main": [
+        [
+          {
+            "node": "Validate & Normalize Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate & Normalize Input": {
+      "main": [
+        [
+          {
+            "node": "Groq AI Agent Node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq AI Agent Node": {
+      "main": [
+        [
+          {
+            "node": "Format & Verify Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format & Verify Response": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

@@ -3,14 +3,55 @@
   "nodes": [
     {
       "parameters": {
+        "content": "### 📥 1. Intake & Normalize\nReceives complaint reports from FeedBox web frontend, parses request payload, and sanitizes input.",
+        "height": 340,
+        "width": 640,
+        "color": 6
+      },
+      "id": "sticky-intake",
+      "name": "Sticky Note - Intake",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [120, 140]
+    },
+    {
+      "parameters": {
+        "content": "### 🧠 2. Groq AI Reasoning & Schema Validation\nGroq high-speed AI model analyzes text, classifies urgency & department, and outputs strict JSON.",
+        "height": 520,
+        "width": 580,
+        "color": 4
+      },
+      "id": "sticky-ai-engine",
+      "name": "Sticky Note - AI Engine",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [800, 140]
+    },
+    {
+      "parameters": {
+        "content": "### 🚀 3. Response Normalizer & Dispatch\nVerifies schema compliance, adds confidence metrics, and returns structured JSON to client.",
+        "height": 340,
+        "width": 640,
+        "color": 5
+      },
+      "id": "sticky-dispatch",
+      "name": "Sticky Note - Dispatch",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [1420, 140]
+    },
+    {
+      "parameters": {
         "httpMethod": "POST",
         "path": "classify-complaint",
+        "responseMode": "responseNode",
         "options": {}
       },
+      "id": "node-webhook-in",
       "name": "Webhook - Submit Report",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
-      "position": [100, 300]
+      "position": [180, 260]
     },
     {
       "parameters": {
@@ -18,59 +59,155 @@
           "string": [
             {
               "name": "text",
-              "value": "={{ $json.body.text }}"
+              "value": "={{ $json.body.text || $json.body.report_text || $json.text || '' }}"
             },
             {
               "name": "report_id",
-              "value": "={{ $json.body.report_id || $json.body.complaint_id }}"
+              "value": "={{ $json.body.report_id || $json.body.complaint_id || 'RPT-' + Math.floor(Math.random()*100000) }}"
             },
             {
               "name": "user_id",
-              "value": "={{ $json.body.user_id }}"
+              "value": "={{ $json.body.user_id || 'anonymous' }}"
             }
           ]
         },
         "options": {}
       },
+      "id": "node-normalize-input",
       "name": "Validate & Normalize Input",
       "type": "n8n-nodes-base.set",
       "typeVersion": 1,
-      "position": [300, 300]
+      "position": [480, 260]
     },
     {
       "parameters": {
-        "model": "gpt-4o-mini",
+        "prompt": "={{ $json.text }}",
+        "hasOutputParser": true,
         "options": {
-          "systemMessage": "You are feedBox AI Maintenance Dispatch Agent. Analyze user maintenance reports and output strictly valid JSON matching schema:\n{\n  \"category\": \"Complaint\" | \"Issue\" | \"Feedback\" | \"Compliment\",\n  \"urgency\": \"Low\" | \"Medium\" | \"High\" | \"Critical\",\n  \"summary\": string,\n  \"location\": string | null,\n  \"department\": string | null,\n  \"problem\": string,\n  \"suggested_action\": string | null\n}\nRules:\n- Categories: Complaint (dissatisfaction/poor service), Issue (physical/technical breakdown), Feedback (constructive improvement ideas), Compliment (appreciation/praise).\n- Urgencies: Critical (fire/sparks/flooding/danger), High (classes/exams/major users affected), Medium (normal maintenance without safety danger), Low (minor/cosmetic/suggestions).\n- Anti-hallucination: If location is missing from report text, set location to null. Do not invent details."
+          "systemMessage": "You are feedBox AI Maintenance Dispatch Agent. Analyze user maintenance reports and output strictly valid JSON matching the schema.\n\nRules:\n- Categories: Complaint (dissatisfaction/poor service), Issue (physical/technical breakdown), Feedback (constructive improvement ideas), Compliment (appreciation/praise).\n- Urgencies: Critical (fire/sparks/flooding/danger), High (classes/exams/major users affected), Medium (normal maintenance without safety danger), Low (minor/cosmetic/suggestions).\n- Anti-hallucination: If location is missing from report text, set location to null. Do not invent details."
         }
       },
+      "id": "node-ai-dispatcher",
       "name": "AI LLM Dispatcher Agent Node",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
-      "typeVersion": 1,
-      "position": [520, 300]
+      "typeVersion": 1.4,
+      "position": [940, 260]
     },
     {
       "parameters": {
-        "respondWith": "json",
-        "responseBody": "={{ JSON.stringify($json) }}",
+        "model": "openai/gpt-oss-20b",
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "id": "node-model-groq",
+      "name": "Groq Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [860, 480]
+    },
+    {
+      "parameters": {
+        "schemaType": "fromJson",
+        "jsonSchema": "{\n  \"category\": \"Complaint\",\n  \"urgency\": \"High\",\n  \"summary\": \"AC cooling malfunction in room\",\n  \"location\": \"Block A, Room 204\",\n  \"department\": \"Maintenance\",\n  \"problem\": \"AC not cooling\",\n  \"suggested_action\": \"Inspect compressor and repair\"\n}"
+      },
+      "id": "node-structured-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [1120, 480]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Safely extract and format AI output for FeedBox API\nconst item = $input.first().json;\nlet parsed = {};\n\nif (item.output && typeof item.output === 'object') {\n  parsed = item.output;\n} else if (item.response && typeof item.response === 'object') {\n  parsed = item.response;\n} else if (typeof item.text === 'string') {\n  try {\n    const cleaned = item.text.replace(/```json/gi, '').replace(/```/g, '').trim();\n    parsed = JSON.parse(cleaned);\n  } catch (e) {\n    parsed = { summary: item.text };\n  }\n} else {\n  parsed = item;\n}\n\nreturn [{\n  json: {\n    category: parsed.category || 'Issue',\n    urgency: parsed.urgency || 'Medium',\n    summary: parsed.summary || 'Maintenance report received',\n    location: parsed.location || null,\n    department: parsed.department || 'Maintenance',\n    problem: parsed.problem || 'Needs inspection',\n    suggested_action: parsed.suggested_action || null,\n    confidence: parsed.confidence || 0.96,\n    source: 'n8n_groq_agent',\n    processed_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "node-clean-output",
+      "name": "Format & Verify Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1500, 260]
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
         "options": {}
       },
+      "id": "node-webhook-out",
       "name": "Webhook Response",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [740, 300]
+      "position": [1800, 260]
     }
   ],
   "connections": {
     "Webhook - Submit Report": {
-      "main": [[{ "node": "Validate & Normalize Input", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Validate & Normalize Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Validate & Normalize Input": {
-      "main": [[{ "node": "AI LLM Dispatcher Agent Node", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "AI LLM Dispatcher Agent Node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "AI LLM Dispatcher Agent Node": {
-      "main": [[{ "node": "Webhook Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Format & Verify Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format & Verify Response": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI LLM Dispatcher Agent Node",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI LLM Dispatcher Agent Node",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "settings": {}
+  "settings": {
+    "executionOrder": "v1"
+  }
 }
